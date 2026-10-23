@@ -1,6 +1,6 @@
-# Khalel Insight AI
+# UniVoice
 
-«Университет, который слышит каждого» — bilingual feedback and issue-resolution MVP for the community of Khalel Dosmukhamedov Atyrau University. This is a prototype, not an official university service.
+UniVoice is a Russian/Kazakh anonymous feedback and issue-resolution platform for universities. The product brand is independent of the institution; each deployment can display its own university name. The included demo uses fictional data.
 
 ## Show the demo
 
@@ -33,6 +33,23 @@ The SQLite database is automatically seeded with **64 fictional reports across 9
 - Zod validation, React Hook Form, honeypot, request-size checks, durable rate limiting, same-origin checks, hashed 192-bit tracking tokens, and server-only secrets.
 - Separate Supabase production repository, Supabase Auth role checks, PostgreSQL migration with RLS/audit/atomic mutations and pgvector similarity.
 - Consent-gated OpenAI structured classification and embeddings with local redaction, validated output, failure handling and explicit administrator retry.
+
+## Configure a university
+
+Set these optional environment variables in `.env.local` or in the deployment settings:
+
+```dotenv
+ORGANIZATION_NAME=Example University
+ORGANIZATION_NAME_RU=Название университета
+ORGANIZATION_NAME_KK=Университет атауы
+ORGANIZATION_INITIALS=EU
+```
+
+The active language selects its matching name, falling back to `ORGANIZATION_NAME` and then a localized demonstration label. The name appears in the public footer and team workspace. Initials are derived from the name unless explicitly configured. Restart the server after changing environment settings.
+
+This MVP supports **one university per deployment and database**. Deploy separate instances with separate Supabase projects for separate universities. It does not yet provide shared-database tenant isolation or institution switching. The existing GitHub repository URL is retained; the product and package name are UniVoice.
+
+The visual direction and reference links are documented in [docs/univoice-design.md](docs/univoice-design.md).
 
 ## Checks
 

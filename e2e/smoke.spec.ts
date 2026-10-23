@@ -2,19 +2,31 @@ import { expect, test } from "@playwright/test";
 import ru from "../src/messages/public-ru.json";
 import kk from "../src/messages/public-kk.json";
 
-test("Kazakh switch persists across public and admin navigation", async ({ page }) => {
+test("Kazakh switch persists across public and admin navigation", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
+  await expect(page).toHaveTitle(/UniVoice/);
+  await expect(page.locator("footer")).toContainText("Демонстрационный университет");
+  await expect(page.locator("h1")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: testInfo.outputPath("univoice-home-ru.png"), animations: "disabled" });
   await page.getByRole("button", { name: "ҚАЗ", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "kk");
+  await expect(page.locator("footer")).toContainText("Демонстрациялық университет");
+  await expect(page.locator("h1")).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("univoice-home-kk.png"), animations: "disabled" });
   await page.goto("/submit");
   await expect(page.getByRole("heading", { name: kk.submit.title, exact: true })).toBeVisible();
   await page.goto("/login");
   await page.getByRole("button", { name: "Демо кабинетке кіру", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.getByRole("heading", { name: "Бәрі назар аударудан басталады." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Өтініштерге шолу" })).toBeVisible();
+  await expect(page.locator("aside")).toContainText("Демонстрациялық университет");
+  await page.screenshot({ path: testInfo.outputPath("univoice-admin-kk.png"), animations: "disabled" });
   await page.getByRole("button", { name: "РУС", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-  await expect(page.getByRole("heading", { name: "Всё начинается с внимания." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Обзор обращений" })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("univoice-admin-ru.png"), animations: "disabled" });
 });
 
 test("private endpoints reject guests and cross-origin mutations", async ({ page, request, baseURL }) => {
@@ -73,4 +85,18 @@ test("mobile public screens fit and remain navigable", async ({ page }) => {
   }
   await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
   await expect(page.locator("#public-mobile-nav")).toBeVisible();
+});
+
+test("dashboard review queue opens the selected report with its period", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Войти в демо-кабинет", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  const reportLink = page.locator('a[href*="tab=reports&days="][href*="&report="]').first();
+  await expect(reportLink).toBeVisible();
+  const href = await reportLink.getAttribute("href");
+  const destination = new URL(href!, "http://localhost");
+  const reportId = destination.searchParams.get("report");
+  await reportLink.click();
+  await expect(page).toHaveURL(/tab=reports.*report=/);
+  await expect(page.locator(`#report-${reportId}`)).toBeVisible();
 });
