@@ -83,12 +83,16 @@ test("failed cookie persistence keeps the choice visible with an actionable erro
   await expect(banner.getByRole("alert")).toHaveText(ru.cookies.saveError);
 });
 
-test("unreadable cookies show a clear error while the site remains available", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(document, "cookie", { configurable: true, get: () => { throw new DOMException("Cookies unavailable", "SecurityError"); } });
-  });
+test("cookies becoming unreadable show a clear error while the site remains available", async ({ page }) => {
   await page.goto("/");
   const banner = page.getByRole("region", { name: ru.cookies.title, exact: true });
+  await expect(banner).toBeVisible();
+  // Exercise our mounted consent store. Throwing before hydration prevents
+  // Next.js's own production navigation bootstrap from starting at all.
+  await page.evaluate(() => {
+    Object.defineProperty(document, "cookie", { configurable: true, get: () => { throw new DOMException("Cookies unavailable", "SecurityError"); } });
+    window.dispatchEvent(new Event("focus"));
+  });
   await expect(banner.getByRole("alert")).toHaveText(ru.cookies.readError);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });

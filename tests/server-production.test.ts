@@ -8,7 +8,7 @@ describe('application repository uses only the real database path',()=>{
   const log=vi.spyOn(console,'error').mockImplementation(()=>{});
   vi.stubGlobal('fetch',async()=>new Response(JSON.stringify({code,message:'private report text',details:'private details',hint:'private hint'}),{status:401,headers:{'content-type':'application/json'}}));
   await expect(getRepository().publicIssues()).rejects.toThrow('unavailable');
-  expect(log).toHaveBeenCalledWith('[UniVoice database] Request failed',{code:code==='PGRST301'?'PGRST301':'unknown'});
+  expect(log).toHaveBeenCalledWith('[UniVoice database] Request failed',{code:code==='PGRST301'?'PGRST301':'unknown',host:'project.supabase.co'});
   expect(JSON.stringify(log.mock.calls)).not.toContain('private');
  });
  it('keeps empty Supabase tables empty even if a legacy demo flag is enabled',async()=>{

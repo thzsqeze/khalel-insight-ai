@@ -6,6 +6,7 @@ import type { Receipt, Repository } from './repository-contract';
 import { serviceClient } from './supabase';
 import { createTrackingCode, hashTrackingCode, isSafePublicTitle } from './security';
 import { ApiError } from './errors';
+import { supabaseServiceConfig } from './config';
 type Row=Record<string,unknown>;
 function submission(row:Row):Submission{return {id:String(row.id),reference:String(row.reference),role:row.role as Submission['role'],category:row.category as Submission['category'],description:String(row.description),faculty:row.faculty as string|null,locale:row.locale as Submission['locale'],aiConsent:Boolean(row.ai_consent),createdAt:String(row.created_at),issueId:row.issue_id as string|null,analysis:row.analysis as Analysis|null,analysisStatus:row.analysis_status as Submission['analysisStatus']};}
 function issue(row:Row,count:number):Issue{return {id:String(row.id),reference:String(row.reference),title:String(row.title),...(row.title_kk?{titleKk:String(row.title_kk)}:{}),category:row.category as Issue['category'],status:row.status as Issue['status'],priority:row.priority as Issue['priority'],owner:row.owner as string|null,publicSummary:row.public_summary as string|null,published:Boolean(row.published),resolutionNote:row.resolution_note as string|null,createdAt:String(row.created_at),updatedAt:String(row.updated_at),count};}
@@ -18,7 +19,7 @@ function check(error:{message:string;code?:string}|null){
  // Provider messages, details and hints can contain report content. Keep only
  // standard SQLSTATE/PostgREST codes in the hosting platform's operational log.
  const code=error.code&&/^(?:[0-9A-Z]{5}|PGRST\d{3})$/.test(error.code)?error.code:'unknown';
- console.error('[UniVoice database] Request failed',{code});
+ console.error('[UniVoice database] Request failed',{code,host:new URL(supabaseServiceConfig().url).hostname});
  throw new ApiError('unavailable',503);
 }
 export class ProductionRepository implements Repository {
