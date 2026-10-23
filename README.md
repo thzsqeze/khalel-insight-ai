@@ -1,42 +1,38 @@
 # UniVoice
 
-UniVoice is a Russian/Kazakh anonymous feedback and issue-resolution platform for universities. The product brand is independent of the institution; each deployment can display its own university name. The included demo uses fictional data.
+UniVoice is a Russian/Kazakh anonymous feedback and issue-resolution platform for universities. Each deployment has its own institution identity and Supabase database. The application starts with no reports, issues or fabricated statistics. There is no demo login or synthetic AI fallback.
 
-## Show the demo
+## Run locally
 
 Requirements: Node.js **22.13+** (Node 24 recommended), pnpm 11.
 
+1. Create a Supabase project and apply `supabase/migrations/202610230001_initial.sql` to its empty application schema.
+2. Copy `.env.example` to `.env.local`. Set the Supabase URL, publishable key, server-only secret key, exact `APP_ORIGIN` and random `RATE_LIMIT_SALT`.
+3. Create a trusted Supabase Auth identity, then grant its profile the `admin` role through an operator SQL connection. See [backend setup](docs/backend.md). No public administrator registration is provided.
+4. Run:
+
 ```bash
 pnpm install
-pnpm demo
+pnpm dev
 ```
 
-Open **http://localhost:3000**. No accounts, paid API keys, or external database are needed. Demo mode is explicit; `pnpm dev` without `DEMO_MODE=true` uses the production configuration instead.
-
-1. Open `/` for the landing page, or `/login` and select **«Войти в демо-кабинет»**.
-2. Explore `/admin`: stored synthetic reports, charts, categories, and active/resolved issue counts.
-3. Open `/submit`, choose student/teacher, describe a problem, and provide privacy consent. AI consent is separate and optional.
-4. Save the private code displayed on the receipt. Enter it on `/track`; it is never included in URLs or stored in plaintext on the server.
-5. In `/admin/issues`, choose **«Без группы»**, expand the report, review the explicitly labeled demo AI suggestion, and create an issue.
-6. Open the issue, assign an internal owner, change status, and save. A resolution note is required to mark an issue resolved. The tracking page and analytics reflect saved changes.
-7. Review suggested related reports and explicitly add/remove membership. Nothing merges automatically.
-8. Switch **РУС / ҚАЗ**. `/issues` shows only reviewed public summaries with at least three associated reports.
-
-The SQLite database is automatically seeded with **64 fictional reports across 9 issues**, including six ungrouped reports. Data and the signing secret persist in `.data/demo.sqlite`. To start a separate demo, set `DEMO_DB_PATH=.data/another-demo.sqlite`. Demo similarity scores are illustrative category matches, not real semantic embeddings. The landing preview is also explicitly illustrative.
+Open **http://localhost:3000** (or set `APP_ORIGIN=http://127.0.0.1:3000` when using that hostname). Public pages render without credentials; persistence and login require a configured Supabase project and return an error when unavailable. A failed database connection is never replaced with fictional records or a success receipt.
 
 ## Implemented
 
-- Responsive landing, multi-step feedback, receipt/copy/download, private tracking, login, public progress, privacy page.
-- Server-protected administrator dashboard, filters, report review, issue grouping/separation, ownership, status, priority, internal resolution notes, and history.
-- Analytics computed from stored records, including categories, trends, role breakdowns and resolution progress.
-- Russian/Kazakh localization with next-intl and a locale cookie; bundled Inter font, Tailwind and reusable shadcn-style primitives, Lucide, Motion and Recharts.
-- Zod validation, React Hook Form, honeypot, request-size checks, durable rate limiting, same-origin checks, hashed 192-bit tracking tokens, and server-only secrets.
-- Separate Supabase production repository, Supabase Auth role checks, PostgreSQL migration with RLS/audit/atomic mutations and pgvector similarity.
-- Consent-gated OpenAI structured classification and embeddings with local redaction, validated output, failure handling and explicit administrator retry.
+- Responsive public pages, category chooser, multi-step feedback, receipt/copy/download, private tracking, real email/password login and public progress.
+- Server-protected dashboard, report review, issue grouping/separation, ownership, status, priority, internal resolution notes and history.
+- Analytics calculated from stored records, plus empty states for a new database.
+- Russian/Kazakh localization with next-intl and persistent language choice; bundled Inter, Tailwind, Lucide, Motion and Recharts.
+- Supabase Auth with verified server-side roles, session refresh, PostgreSQL RLS, audit history, atomic mutations and pgvector similarity.
+- Zod validation, honeypot, body limits, durable rate limits, same-origin checks, hashed 192-bit tracking tokens and server-only secrets.
+- Separate optional AI consent, OpenAI classification/embeddings, local redaction, output validation and administrator retry. Provider failures retain the report without inventing analysis.
+
+Students and teachers submit without accounts. The private receipt code is needed to track status. Public progress includes only human-reviewed summaries of groups with at least three reports, never raw complaint text.
 
 ## Configure a university
 
-Set these optional environment variables in `.env.local` or in the deployment settings:
+Optional `.env.local` or deployment variables:
 
 ```dotenv
 ORGANIZATION_NAME=Example University
@@ -45,11 +41,11 @@ ORGANIZATION_NAME_KK=Университет атауы
 ORGANIZATION_INITIALS=EU
 ```
 
-The active language selects its matching name, falling back to `ORGANIZATION_NAME` and then a localized demonstration label. The name appears in the public footer and team workspace. Initials are derived from the name unless explicitly configured. Restart the server after changing environment settings.
+The active language selects its matching name, falling back to `ORGANIZATION_NAME`, then the neutral “Университетское сообщество” / “Университет қауымдастығы”. Restart the server after changing environment settings.
 
-This MVP supports **one university per deployment and database**. Deploy separate instances with separate Supabase projects for separate universities. It does not yet provide shared-database tenant isolation or institution switching. The existing GitHub repository URL is retained; the product and package name are UniVoice.
+This MVP supports **one university per deployment and database**. Use separate Supabase projects for separate institutions. Shared-database tenant isolation and institution switching are not implemented. The existing GitHub repository URL is retained; the product and package name are UniVoice.
 
-The visual direction and reference links are documented in [docs/univoice-design.md](docs/univoice-design.md).
+Design references and decisions: [docs/univoice-design.md](docs/univoice-design.md).
 
 ## Checks
 
@@ -57,44 +53,38 @@ The visual direction and reference links are documented in [docs/univoice-design
 pnpm lint
 pnpm typecheck
 pnpm test
-DEMO_MODE=true pnpm build
+pnpm build
 pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-Vitest covers analytics, input validation, privacy/redaction, authorization, request boundaries, persistence, tracking, publication thresholds and rate limits. SQL RLS assertions are in `supabase/tests/rls.sql`; they require a real migrated Supabase database and are separate from Vitest.
+Vitest covers validation, privacy, analytics, authorization, real-repository failure/empty behavior, session refresh and rejection of the removed demo bypass. A blank SQLite adapter exists only under `tests/fixtures` for isolated repository contract tests; it is never imported by the application.
 
-The build uses Next.js's supported Webpack compiler because Turbopack's build-time worker port is blocked in some restricted desktop environments. Development still uses Turbopack. Playwright starts an isolated demo on port 3100, or uses `PW_BASE_URL` when supplied.
+Playwright starts the regular application on port 3100, or uses `PW_BASE_URL` when supplied. Browser smoke tests exercise localization, login protection, topic preselection, explicit consents and mobile navigation without creating records. The SQL RLS assertions in `supabase/tests/rls.sql` require a migrated Supabase test database; their transactional fixtures are rolled back. Live authenticated submission/tracking/administration still requires verification against configured services.
 
-## Production / Vercel
+The production build uses the supported Webpack compiler because some desktop sandboxes restrict Turbopack build workers. Development uses Turbopack.
 
-1. Apply `supabase/migrations/202610230001_initial.sql` to an empty Supabase application schema.
-2. Copy `.env.example` to `.env.local` for local configuration, or set the corresponding Vercel environment variables.
-3. Set `DEMO_MODE=false`, the exact HTTPS `APP_ORIGIN`, Supabase URL/anon key, and the **server-only** service role key.
-4. Create a trusted Supabase Auth administrator identity and assign `profiles.role='admin'` using an operator SQL connection. Clients cannot grant themselves roles. There is no public administrator registration.
-5. Set a random `RATE_LIMIT_SALT`. Configure `TRUSTED_IP_HEADER` only for a header your ingress overwrites (on Vercel, `x-vercel-forwarded-for`). Otherwise clients share a conservative global bucket.
-6. For live AI, set `OPENAI_API_KEY`, `OPENAI_MODEL`, and `OPENAI_EMBEDDING_MODEL`. Missing or failed AI does not discard feedback. Production never substitutes synthetic analysis.
-7. Import the repository into Vercel as a Next.js project, select Node 24, and build with `pnpm build`. Do not deploy the SQLite demo to ephemeral serverless storage.
-8. Run the SQL RLS assertions and integration smoke checks against the configured services before collecting real feedback.
+## Deployment
 
-Full configuration and operational details: [docs/backend.md](docs/backend.md).
+Set the variables from `.env.example` in your hosting environment. Use the exact HTTPS `APP_ORIGIN`, keep `SUPABASE_SECRET_KEY` server-only and configure `TRUSTED_IP_HEADER` only when your ingress overwrites it. Legacy Supabase anon/service-role keys remain supported. OpenAI is optional. Deploy on the Node runtime (Node 24 recommended) with `pnpm build`.
 
-## Boundaries and remaining work
+Full setup, roles, privacy boundaries and operations: [docs/backend.md](docs/backend.md).
 
-The local demo is suitable for a presentation. Supabase, OpenAI and Vercel deployment are implemented as configuration paths but have **not been verified against live services** in this workspace. The migration/RLS script has not been executed without a database.
+## Current integration status and limitations
 
-Attachments are deferred. No email notifications, retention scheduler, automatic retry queue, deletion UI, or MFA management UI is included. AI runs after receipt persistence; interrupted pending analysis can be retried manually. Public publication needs human review for indirect identification; pattern-based personal-data detection is conservative and incomplete. Raw descriptions are visible to authorized moderators. Before launch, the university must approve privacy wording, retention/access rules, and production operational procedures.
+The Supabase schema and application adapter are ready in this repository. A hosted project, its migration and the first administrator have **not yet been provisioned or verified**; account authorization is pending. No sample data is migrated from the former local demo.
 
-For an MVP the administrator fetches records and computes analytics client-side after authorization; larger datasets need paginated tables and SQL aggregate endpoints. Demo SQLite requires persistent local storage.
+Attachments, email notifications, a retention scheduler, automatic retry queue, deletion UI and MFA management UI are not included. Interrupted AI processing can be retried manually. Pattern-based personal-data detection is conservative and incomplete; public summaries need human review. Authorized moderators can read raw reports. The institution must set its privacy, retention and access rules before collecting feedback.
+
+The administrator snapshot fetches stored records with paging and computes analytics client-side; large datasets need SQL aggregates and paginated tables.
 
 ## Source map
 
-- `src/app/`: public and protected routes; JSON API handlers.
-- `src/components/public/`: landing and public user flows.
-- `src/components/admin/`: dashboard, charts, review and management screens.
-- `src/components/ui/`: reusable UI primitives.
-- `src/lib/server/`: auth, validation, privacy, repositories and AI.
-- `src/lib/analytics.ts`: stored-data analytics and filtering.
+- `src/app/`: public/protected routes and JSON API handlers.
+- `src/components/public/`, `src/components/admin/`, `src/components/ui/`: interface components.
+- `src/lib/server/`: Supabase repositories, auth, validation, privacy and AI.
+- `src/proxy.ts`: administrator session cookie refresh.
+- `src/lib/analytics.ts`: analytics and filtering.
 - `src/messages/`, `src/i18n/`: Russian and Kazakh messages.
-- `supabase/`: schema and authorization assertions.
-- `tests/`: unit/integration tests; `e2e/`: browser smoke tests.
+- `supabase/`: schema and RLS assertions.
+- `tests/`, `e2e/`: automated checks.

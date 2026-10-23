@@ -1,24 +1,36 @@
 # Server and database operation
 
-The local demo requires Node 22.13+ (`node:sqlite`) and `DEMO_MODE=true`. It creates `.data/demo.sqlite` with WAL journaling and foreign keys. All submissions, grouping changes, status history, publication reviews, and rate limits persist. The initial seed contains 64 fictional reports: 58 linked to nine issues and six ungrouped. There are no live university records or live AI requests in demo mode. Synthetic similarity matches use category, with a fixed illustrative score, and are explicitly in the demo dataset.
-
-`DEMO_DB_PATH` selects a different persistent file. The server generates a signing secret in the SQLite settings table unless `DEMO_SESSION_SECRET` is provided. A demo login creates an eight-hour, signed, HttpOnly, same-site cookie. Production never accepts this cookie. Keep the SQLite file private and back it up together with its WAL state. Use the SQLite backup API or stop the server before copying it. The demo is for one local Node service with persistent disk, not Vercel/serverless instances.
+The application uses Supabase for all persisted data and Supabase Auth for administrator identities. It does not seed records, open a local database or accept the old demo cookie. SQLite is used only by isolated tests under `tests/fixtures`.
 
 ## Production setup
 
 1. Create a Supabase project with PostgreSQL and pgvector support. Apply `supabase/migrations/202610230001_initial.sql` through the Supabase CLI or SQL editor. The migration is one transaction and intended for an empty application schema.
-2. Set `DEMO_MODE=false`, `APP_ORIGIN` to the exact HTTPS application origin, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`. Do not expose the service key in a `NEXT_PUBLIC_*` variable.
+2. Set `APP_ORIGIN` to the exact application origin (HTTPS in production), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `SUPABASE_SECRET_KEY`. Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` are accepted as fallback. Do not expose a secret/service key in a `NEXT_PUBLIC_*` variable. Store local credentials in the ignored `.env.local`.
 3. Create administrator identities through trusted Supabase administration. The auth trigger always creates a `viewer` profile, ignoring user metadata. Grant the chosen role with an operator SQL connection: `update public.profiles set role = 'admin' where id = '<verified-auth-user-uuid>';`. Disable public signups if the deployment does not need them. End users submitting reports never need an auth identity.
 4. Configure a random `RATE_LIMIT_SALT` and `TRUSTED_IP_HEADER` only when the ingress overwrites that header. On Vercel, use `x-vercel-forwarded-for`. Without an explicitly trusted header, requests share a conservative global rate-limit bucket. Never pass a client-provided forwarding header through unchanged.
 5. Optionally set `OPENAI_API_KEY`, `OPENAI_MODEL` and `OPENAI_EMBEDDING_MODEL`. The defaults are `gpt-4.1-mini` and `text-embedding-3-small`. Configure models supported by your account. Embedding dimensions must remain 1536 unless the migration and index are updated together.
 6. Run the RLS checks on a disposable migrated Supabase database: `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/tests/rls.sql`. The test creates temporary transactional fixtures and rolls them back. The PostgreSQL connection needs owner permissions to simulate `anon`, `authenticated`, and `service_role`.
 7. Deploy using the Node runtime. Feedback is persisted before AI work is scheduled using Next.js `after()`. AI routes allow 60 seconds; the provider has a 20-second timeout with no automatic retries. Review pending/failed records from the administrator UI and explicitly retry if a background invocation was interrupted.
 
+## First administrator
+
+Create the trusted operator in Supabase Authentication using an email/password identity. Set the password in a trusted password flow, never in a committed file. New profiles always begin as `viewer`. After verifying the exact Auth UUID, run:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = '<verified-auth-user-uuid>';
+```
+
+Then sign in at `/login` and confirm `/api/admin/overview` returns the empty database. A profile role cannot be granted through signup metadata or from the browser. Provision additional moderators explicitly with the `moderator` role. There are no default credentials, seed accounts or fake metrics.
+
+Hosted project provisioning, migration execution and the first account remain pending account authorization. Do not treat a successful local build as proof of a live connection.
+
 ## Security and privacy boundaries
 
-Every administrator API independently calls `requireAdmin()`. Production uses Supabase `auth.getUser()` and queries `profiles.role` server-side, never token metadata or a client role field. The SQL migration enables RLS on every private table, denies anonymous direct table access, denies ordinary authenticated users private data, and removes all profile mutation privileges. Administrative mutations use service-only atomic RPCs with a validated administrator actor and audit records.
+The Next.js proxy refreshes Supabase session cookies on administrator routes and sets private/no-store cache headers. Every administrator API independently calls `requireAdmin()`. Authentication uses Supabase `auth.getUser()` and queries `profiles.role` server-side, never token metadata or a client role field. The SQL migration enables RLS on every private table, denies anonymous direct table access, denies ordinary authenticated users private data, and removes all profile mutation privileges. Administrative mutations use service-only atomic RPCs with a validated administrator actor and audit records.
 
-All state-changing endpoints check the exact browser origin. JSON bodies are streamed with a 16 KiB limit; role/category/length constraints, consent, an empty honeypot, and a two-second minimum fill time are enforced server-side. Feedback allows five attempts per hour, tracking thirty per ten minutes, login ten per fifteen minutes, and administrator AI retries thirty per hour. Rate limits persist in SQLite or use an atomic PostgreSQL upsert.
+All state-changing endpoints check the exact browser origin. JSON bodies are streamed with a 16 KiB limit; role/category/length constraints, consent, an empty honeypot, and a two-second minimum fill time are enforced server-side. Feedback allows five attempts per hour, tracking thirty per ten minutes, login ten per fifteen minutes, and administrator AI retries thirty per hour. Rate limits use an atomic PostgreSQL upsert and never fall back to process memory or a local demo.
 
 Tracking codes contain 192 random bits. Only their SHA-256 hashes are stored. The receipt is the only place the code is returned; losing it cannot be recovered from the database. Tracking outputs reference, category, status, dates, and status/date events only. Codes are submitted in a JSON POST body, never a URL.
 
