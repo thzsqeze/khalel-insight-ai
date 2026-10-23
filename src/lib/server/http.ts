@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { ApiError } from './errors';
 import { getRepository } from './repository';
+import { captureServerError } from './diagnostics';
 export { assertSameOrigin } from './origin';
 export async function readJson(request:Request):Promise<unknown>{
  if(!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))throw new ApiError('invalid_input');
@@ -17,4 +18,16 @@ export async function rateLimit(request:Request,scope:string,limit:number,window
  const key=createHash('sha256').update(`${process.env.RATE_LIMIT_SALT??'khalel'}:${ip??'unknown'}`).digest('hex');
  if(!await getRepository().consumeRateLimit(key,scope,limit,windowMs))throw new ApiError('rate_limited',429);
 }
-export async function respond(action:()=>Promise<unknown>,status=200){try{return NextResponse.json(await action(),{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});}catch(error){const known=error instanceof ApiError;return NextResponse.json({error:known?error.code:error instanceof ZodError?'invalid_input':'unavailable'},{status:known?error.status:error instanceof ZodError?400:503,headers:{'Cache-Control':'no-store'}});}}
+export async function respond(action: () => Promise<unknown>, status = 200) {
+  try {
+    return NextResponse.json(await action(), { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+  } catch (error) {
+    const known = error instanceof ApiError;
+    const invalid = error instanceof ZodError;
+    if ((!known && !invalid) || (known && error.status >= 500)) await captureServerError(error);
+    return NextResponse.json(
+      { error: known ? error.code : invalid ? 'invalid_input' : 'unavailable' },
+      { status: known ? error.status : invalid ? 400 : 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+}

@@ -1,0 +1,16 @@
+import type { BrowserOptions } from "@sentry/nextjs";
+
+// SDK v11 collects these categories by default. Explicitly disable every one.
+export const diagnosticDataCollection: NonNullable<BrowserOptions["dataCollection"]> = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: false,
+  httpBodies: [],
+  urlQueryParams: false,
+  graphQL: { document: false, variables: false },
+  genAI: { inputs: false, outputs: false },
+  databaseQueryData: false,
+  queues: false,
+  stackFrameVariables: false,
+  frameContextLines: 0,
+};
