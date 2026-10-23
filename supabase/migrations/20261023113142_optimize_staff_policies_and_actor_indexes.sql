@@ -1,0 +1,11 @@
+begin;
+create index audit_events_actor_idx on public.audit_events(actor);
+create index issues_public_reviewed_by_idx on public.issues(public_reviewed_by);
+create index status_events_actor_idx on public.status_events(actor);
+alter policy profiles_read on public.profiles using (id=(select auth.uid()) or (select public.is_staff()));
+alter policy issues_staff_read on public.issues using ((select public.is_staff()));
+alter policy submissions_staff_read on public.submissions using ((select public.is_staff()));
+alter policy status_staff_read on public.status_events using ((select public.is_staff()));
+alter policy audit_staff_read on public.audit_events using ((select public.is_staff()));
+alter policy embeddings_staff_read on public.submission_embeddings using ((select public.is_staff()));
+commit;
