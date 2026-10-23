@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Brand } from "@/components/brand";
+import { CookieSettingsButton } from "@/components/cookie-consent";
 
 export function PublicLogo({ inverse = false }: { inverse?: boolean }) {
   return <Brand inverse={inverse} />;
@@ -61,7 +62,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8 lg:px-12">
         <div className="flex flex-col justify-between gap-7 md:flex-row md:items-start">
           <div><Link href="/" aria-label={t("home")}><PublicLogo /></Link><p className="mt-4 text-xs text-muted-foreground">{t("footer")}</p></div>
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-4 text-xs text-muted-foreground"><Link className="hover:text-primary" href="/privacy">{t("privacy")}</Link><Link className="hover:text-primary" href="/track">{t("track")}</Link><Link className="hover:text-primary" href="/login">{t("login")}</Link></div>
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-4 text-xs text-muted-foreground"><Link className="hover:text-primary" href="/privacy">{t("privacy")}</Link><CookieSettingsButton className="min-h-9 hover:text-primary" /><Link className="hover:text-primary" href="/track">{t("track")}</Link><Link className="hover:text-primary" href="/login">{t("login")}</Link></div>
         </div>
         <div className="mt-9 flex flex-col justify-between gap-3 border-t border-border pt-5 text-xs text-muted-foreground sm:flex-row"><span>{t("copyright")}<span className="mx-2">/</span>{org.raw("name")}</span><span>{t("footerNote")}</span></div>
       </div>

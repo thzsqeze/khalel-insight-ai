@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { LayoutDashboard, MessagesSquare, ChartNoAxesCombined, ArrowUpRight, ShieldCheck, LogOut, Menu, X, ExternalLink } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { CookieSettingsButton } from "@/components/cookie-consent";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { requestJson } from "@/lib/client-api";
@@ -56,6 +57,7 @@ export function AdminShell({ session, children }: { session: AdminSession; child
       <nav className="space-y-1 px-3" aria-label={t("publicProgress")}>
         <Link href="/issues" className="flex items-center gap-3 rounded-md px-3 py-3 text-xs text-[#74786e] hover:bg-[#e8eae2]"><ExternalLink className="size-4" strokeWidth={1.6} />{t("publicProgress")}<ArrowUpRight className="ml-auto size-3" /></Link>
         <Link href="/privacy" className="flex items-center gap-3 rounded-md px-3 py-3 text-xs text-[#74786e] hover:bg-[#e8eae2]"><ShieldCheck className="size-4" strokeWidth={1.6} />{t("privacy")}</Link>
+        <CookieSettingsButton icon onOpen={() => setMenuOpen(false)} returnFocusId="admin-menu-toggle" className="flex w-full items-center gap-3 rounded-md px-3 py-3 text-xs text-[#74786e] hover:bg-[#e8eae2]" />
       </nav>
       <div className="mt-auto px-6 pb-5 pt-8"><p className="text-[11px] leading-5 text-[#74786e]">{t("privateData")}</p></div>
       <div className="flex items-center gap-2.5 border-t border-[#dedfd7] px-5 py-4">
@@ -66,7 +68,7 @@ export function AdminShell({ session, children }: { session: AdminSession; child
     </aside>
     <div className="min-w-0 lg:pl-[232px]">
       <header className="flex h-[64px] items-center justify-between gap-4 border-b border-[#dedfd7] bg-[#f6f5f1] px-5 sm:px-8">
-        <div className="flex min-w-0 items-center gap-3"><Button variant="ghost" size="icon" className="-ml-2 lg:hidden" aria-label={t("menu")} onClick={() => setMenuOpen(true)}><Menu /></Button><p className="truncate text-xs text-[#74786e]"><span className="hidden sm:inline">{t("workspace")}<span className="mx-3 text-[#b8bcb0]">/</span></span><span className="text-[#242722]">{current?.label ?? t("issues")}</span></p></div>
+        <div className="flex min-w-0 items-center gap-3"><Button id="admin-menu-toggle" variant="ghost" size="icon" className="-ml-2 lg:hidden" aria-label={t("menu")} onClick={() => setMenuOpen(true)}><Menu /></Button><p className="truncate text-xs text-[#74786e]"><span className="hidden sm:inline">{t("workspace")}<span className="mx-3 text-[#b8bcb0]">/</span></span><span className="text-[#242722]">{current?.label ?? t("issues")}</span></p></div>
         <div className="flex shrink-0 items-center gap-3 sm:gap-6">
           <div className="flex items-center gap-0.5 rounded-md border border-[#dedfd7] p-0.5" role="group" aria-label={t("language")}>{["ru", "kk"].map(lang => <button key={lang} onClick={() => changeLanguage(lang)} disabled={pending} aria-pressed={locale === lang} className={cn("rounded px-2.5 py-1.5 text-[10px] font-medium", locale === lang ? "bg-white text-[#242722]" : "text-[#74786e] hover:text-[#242722]")}>{lang === "ru" ? "РУС" : "ҚАЗ"}</button>)}</div>
           <Link href="/" className="hidden items-center gap-1.5 text-xs text-[#74786e] hover:text-primary sm:flex">{t("backHome")}<ArrowUpRight className="size-3.5" /></Link>
