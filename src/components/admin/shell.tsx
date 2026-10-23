@@ -39,9 +39,9 @@ export function AdminShell({ session, children }: { session: AdminSession; child
   return <div className="min-h-screen bg-[#f6f5f1] text-[#242722]">
     <a href="#admin-main" className="sr-only z-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:bg-white focus:p-4">{t("overview")}</a>
     {menuOpen && <button className="fixed inset-0 z-30 bg-[#242722]/25 lg:hidden" aria-label={t("closeMenu")} onClick={() => setMenuOpen(false)} />}
-    <aside className={cn("fixed inset-y-0 left-0 z-40 flex w-[232px] flex-col border-r border-[#dedfd7] bg-[#f0f1eb] transition-transform lg:translate-x-0", menuOpen ? "translate-x-0" : "-translate-x-full")}>
-      <div className="flex h-[82px] shrink-0 items-center justify-between px-6">
-        <Link href="/" aria-label="UniVoice"><Brand /></Link>
+    <aside className={cn("fixed inset-y-0 left-0 z-40 flex w-[232px] flex-col border-r border-[#dedfd7] bg-[#fffefa] transition-transform lg:translate-x-0", menuOpen ? "translate-x-0" : "-translate-x-full")}>
+      <div className="flex h-[82px] shrink-0 items-center justify-between bg-[#294b3c] px-6">
+        <Link href="/" aria-label="UniVoice"><Brand inverse /></Link>
         <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t("closeMenu")} onClick={() => setMenuOpen(false)}><X /></Button>
       </div>
       <div className="mx-5 mb-7 flex items-start gap-3 border-y border-[#dedfd7] py-4">
@@ -50,7 +50,7 @@ export function AdminShell({ session, children }: { session: AdminSession; child
       </div>
       <p className="mb-2 px-6 text-[10px] font-medium tracking-[0.08em] text-[#74786e]">{t("navigation")}</p>
       <nav className="space-y-1 px-3" aria-label={t("navigation")}>
-        {navigation.map(item => { const active = current?.href === item.href; return <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={active ? "page" : undefined} className={cn("flex items-center gap-3 rounded-md px-3 py-3 text-[13px] transition-colors", active ? "bg-[#dfe5d9] font-medium text-[#294b3c]" : "text-[#74786e] hover:bg-[#e8eae2] hover:text-[#242722]")}><item.icon className="size-[17px] shrink-0" strokeWidth={1.6} />{item.label}</Link>; })}
+        {navigation.map(item => { const active = current?.href === item.href; return <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={active ? "page" : undefined} className={cn("flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] transition-colors", active ? "bg-[#315747] font-medium text-white" : "text-[#74786e] hover:bg-[#e8eae2] hover:text-[#242722]")}><item.icon className="size-[17px] shrink-0" strokeWidth={1.6} />{item.label}</Link>; })}
       </nav>
       <div className="mx-5 my-5 border-t border-[#dedfd7]" />
       <nav className="space-y-1 px-3" aria-label={t("publicProgress")}>
@@ -59,8 +59,8 @@ export function AdminShell({ session, children }: { session: AdminSession; child
       </nav>
       <div className="mt-auto px-6 pb-5 pt-8"><p className="text-[11px] leading-5 text-[#74786e]">{t("privateData")}</p></div>
       <div className="flex items-center gap-2.5 border-t border-[#dedfd7] px-5 py-4">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-[#d5d8cd] bg-[#e7e9e0] text-xs font-medium text-[#515b4a]">{session.demo ? "D" : session.email.slice(0, 1).toUpperCase()}</div>
-        <div className="min-w-0 flex-1"><p className="truncate text-[11px] font-medium" title={session.email}>{session.demo ? t("demoAccount") : session.email}</p><p className="mt-1 text-[10px] text-[#74786e]">{t(session.role === "admin" ? "administrator" : "moderator")}</p></div>
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-[#d5d8cd] bg-[#e7e9e0] text-xs font-medium text-[#515b4a]">{session.email.slice(0, 1).toUpperCase()}</div>
+        <div className="min-w-0 flex-1"><p className="truncate text-[11px] font-medium" title={session.email}>{session.email}</p><p className="mt-1 text-[10px] text-[#74786e]">{t(session.role === "admin" ? "administrator" : "moderator")}</p></div>
         <button onClick={logout} disabled={pending} aria-label={t("logout")} className="rounded-md p-2 text-[#74786e] hover:bg-[#e2e5da] hover:text-[#242722]"><LogOut className="size-4" /></button>
       </div>
     </aside>
@@ -72,7 +72,6 @@ export function AdminShell({ session, children }: { session: AdminSession; child
           <Link href="/" className="hidden items-center gap-1.5 text-xs text-[#74786e] hover:text-primary sm:flex">{t("backHome")}<ArrowUpRight className="size-3.5" /></Link>
         </div>
       </header>
-      {session.demo && <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#dedfd7] bg-[#eeefe7] px-5 py-2.5 text-[10px] text-[#626b59] sm:px-8"><span className="rounded border border-[#cdd2c1] px-1.5 py-0.5 text-[9px] font-semibold tracking-[0.06em]">{t("demo")}</span><span>{t("demoDescription")}</span></div>}
       {error && <p role="alert" className="bg-red-50 p-3 text-center text-sm text-red-700">{t("error")}</p>}
       <main id="admin-main" className="mx-auto max-w-[1640px] p-5 sm:p-8 xl:px-9 xl:py-8">{children}</main>
     </div>
