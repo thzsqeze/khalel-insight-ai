@@ -1,0 +1,49 @@
+// Isolated test adapter. Never import this module from application runtime code.
+import { DatabaseSync } from 'node:sqlite';
+import { mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { randomBytes, randomUUID } from 'node:crypto';
+import type { AdminSnapshot, Analysis, FeedbackInput, Issue, IssueDetail, PublicIssue, Status, StatusEvent, Submission, TrackingResult } from '@/lib/types';
+import { createTrackingCode, hashTrackingCode, isSafePublicTitle } from '@/lib/server/security';
+import { ApiError } from '@/lib/server/errors';
+import { PUBLIC_MIN_GROUP } from '@/lib/server/config';
+import type { Repository, Receipt } from '@/lib/server/repository-contract';
+import type { IssueCreate, IssuePatch, ReviewInput } from '@/lib/server/validation';
+type JsonRow={data:string};
+export class SQLiteTestRepository implements Repository {
+ readonly db:DatabaseSync;
+ constructor(path:string){
+  mkdirSync(dirname(path),{recursive:true});this.db=new DatabaseSync(path);this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
+   CREATE TABLE IF NOT EXISTS issues(id TEXT PRIMARY KEY,data TEXT NOT NULL,public_reviewed_at TEXT);
+   CREATE TABLE IF NOT EXISTS submissions(id TEXT PRIMARY KEY,tracking_hash TEXT NOT NULL UNIQUE,issue_id TEXT REFERENCES issues(id) ON DELETE SET NULL,data TEXT NOT NULL);
+   CREATE INDEX IF NOT EXISTS submissions_issue ON submissions(issue_id);
+   CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY,issue_id TEXT NOT NULL REFERENCES issues(id),data TEXT NOT NULL);
+   CREATE INDEX IF NOT EXISTS events_issue ON events(issue_id);
+   CREATE TABLE IF NOT EXISTS audit_events(id TEXT PRIMARY KEY,actor TEXT NOT NULL,action TEXT NOT NULL,entity_id TEXT NOT NULL,created_at TEXT NOT NULL);
+   CREATE TABLE IF NOT EXISTS rate_limits(key TEXT NOT NULL,scope TEXT NOT NULL,window_start INTEGER NOT NULL,count INTEGER NOT NULL,PRIMARY KEY(key,scope));`);
+ }
+ private transaction<T>(action:()=>T):T{this.db.exec('BEGIN IMMEDIATE');try{const result=action();this.db.exec('COMMIT');return result}catch(error){this.db.exec('ROLLBACK');throw error}}
+ private audit(action:string,entityId:string,actor:string){this.db.prepare('INSERT INTO audit_events VALUES(?,?,?,?,?)').run(randomUUID(),actor,action,entityId,new Date().toISOString());}
+ private issue(id:string):Issue|null{const row=this.db.prepare('SELECT data FROM issues WHERE id=?').get(id) as JsonRow|undefined;if(!row)return null;const count=(this.db.prepare('SELECT COUNT(*) AS count FROM submissions WHERE issue_id=?').get(id) as {count:number}).count;return {...JSON.parse(row.data),count};}
+ private putIssue(issue:Issue){const {count:_,...data}=issue;void _;this.db.prepare('UPDATE issues SET data=? WHERE id=?').run(JSON.stringify(data),issue.id);}
+ private submission(id:string):Submission|null{const row=this.db.prepare('SELECT data,issue_id FROM submissions WHERE id=?').get(id) as (JsonRow&{issue_id:string|null})|undefined;return row?{...JSON.parse(row.data),issueId:row.issue_id}:null;}
+ private putSubmission(sub:Submission){this.db.prepare('UPDATE submissions SET data=?,issue_id=? WHERE id=?').run(JSON.stringify(sub),sub.issueId,sub.id);}
+ private events(id:string):StatusEvent[]{return (this.db.prepare('SELECT data FROM events WHERE issue_id=? ORDER BY rowid').all(id) as JsonRow[]).map(row=>JSON.parse(row.data));}
+ private addEvent(issueId:string,status:Status,note:string|null,actor:string,createdAt=new Date().toISOString()){const event:StatusEvent={id:randomUUID(),issueId,status,note,actor,createdAt};this.db.prepare('INSERT INTO events VALUES(?,?,?)').run(event.id,issueId,JSON.stringify(event));}
+ async createSubmission(input:FeedbackInput):Promise<Receipt>{
+  const id=randomUUID(),trackingCode=createTrackingCode(),reference=`UV-${randomBytes(4).toString('hex').toUpperCase()}`;const analysisStatus=input.aiConsent?'pending':'skipped';
+  const sub:Submission={id,reference,role:input.role,category:input.category,description:input.description,faculty:input.faculty||null,locale:input.locale,aiConsent:input.aiConsent,createdAt:new Date().toISOString(),issueId:null,analysis:null,analysisStatus};
+  this.db.prepare('INSERT INTO submissions VALUES(?,?,?,?)').run(id,hashTrackingCode(trackingCode),null,JSON.stringify(sub));return {id,trackingCode,reference,analysisStatus};
+ }
+ async getSubmission(id:string){return this.submission(id);}
+ async track(code:string):Promise<TrackingResult|null>{const row=this.db.prepare('SELECT id FROM submissions WHERE tracking_hash=?').get(hashTrackingCode(code)) as {id:string}|undefined;if(!row)return null;const sub=this.submission(row.id)!;const issue=sub.issueId?this.issue(sub.issueId):null;return {reference:sub.reference,category:sub.category,status:issue?.status??'new',createdAt:sub.createdAt,events:[{status:'new',createdAt:sub.createdAt},...(issue?this.events(issue.id).filter(event=>event.createdAt>=sub.createdAt).map(event=>({status:event.status,createdAt:event.createdAt})):[])]};}
+ async snapshot():Promise<AdminSnapshot>{return {issues:(this.db.prepare('SELECT id FROM issues').all() as {id:string}[]).map(row=>this.issue(row.id)!).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)),submissions:(this.db.prepare('SELECT id FROM submissions ORDER BY rowid DESC').all() as {id:string}[]).map(row=>this.submission(row.id)!),events:(this.db.prepare('SELECT data FROM events ORDER BY rowid DESC').all() as JsonRow[]).map(row=>JSON.parse(row.data))};}
+ async publicIssues():Promise<PublicIssue[]>{return (this.db.prepare('SELECT id FROM issues WHERE public_reviewed_at IS NOT NULL').all() as {id:string}[]).map(row=>this.issue(row.id)!).filter(issue=>issue.published&&issue.publicSummary&&issue.count>=PUBLIC_MIN_GROUP).map(issue=>({id:issue.id,title:issue.title,...(issue.titleKk?{titleKk:issue.titleKk}:{}),category:issue.category,status:issue.status,count:issue.count,publicSummary:issue.publicSummary!,updatedAt:issue.updatedAt})).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));}
+ async issueDetail(id:string):Promise<IssueDetail|null>{const issue=this.issue(id);if(!issue)return null;const snapshot=await this.snapshot();return {issue,submissions:snapshot.submissions.filter(sub=>sub.issueId===id),events:this.events(id),similar:[]};}
+ async createIssue(input:IssueCreate,actor:string):Promise<string>{return this.transaction(()=>{const sub=this.submission(input.submissionId);if(!sub)throw new ApiError('not_found',404);if(sub.issueId)throw new ApiError('invalid_input');const now=new Date().toISOString();const issue:Issue={id:randomUUID(),reference:`UV-${randomBytes(3).toString('hex').toUpperCase()}`,title:input.title,category:input.category,status:'new',priority:'medium',owner:null,publicSummary:null,published:false,resolutionNote:null,createdAt:now,updatedAt:now,count:1};this.db.prepare('INSERT INTO issues(id,data) VALUES(?,?)').run(issue.id,JSON.stringify(issue));this.putSubmission({...sub,issueId:issue.id});this.addEvent(issue.id,'new',null,actor);this.audit('issue.created',issue.id,actor);this.audit('membership.added',sub.id,actor);return issue.id;});}
+ async patchIssue(id:string,patch:IssuePatch,actor:string):Promise<void>{this.transaction(()=>{const current=this.issue(id);if(!current)throw new ApiError('not_found',404);const next={...current,...patch,updatedAt:new Date().toISOString()};if(next.status==='resolved'&&!next.resolutionNote?.trim())throw new ApiError('invalid_input');if(next.published&&!next.publicSummary)throw new ApiError('invalid_input');if(patch.title&&patch.title!==current.title&&patch.publicSummary===undefined)next.published=false;if(next.published&&(!current.published||next.title!==current.title)&&!isSafePublicTitle(next.title))throw new ApiError('invalid_input');this.putIssue(next);if(patch.publicSummary!==undefined)this.db.prepare('UPDATE issues SET public_reviewed_at=? WHERE id=?').run(patch.publicSummary?next.updatedAt:null,id);if(next.status!==current.status)this.addEvent(id,next.status,next.resolutionNote,actor);this.audit('issue.updated',id,actor);});}
+ async membership(id:string,submissionId:string,action:'add'|'remove',actor:string):Promise<void>{this.transaction(()=>{const issue=this.issue(id),sub=this.submission(submissionId);if(!issue||!sub)throw new ApiError('not_found',404);if(action==='add'&&sub.issueId&&sub.issueId!==id)throw new ApiError('invalid_input');if(action==='remove'&&sub.issueId!==id)throw new ApiError('invalid_input');this.putSubmission({...sub,issueId:action==='add'?id:null});this.putIssue({...issue,updatedAt:new Date().toISOString()});this.audit(`membership.${action}`,submissionId,actor);});}
+ async saveAnalysis(id:string,analysis:Analysis|null,status:Submission['analysisStatus']):Promise<void>{const sub=this.submission(id);if(!sub)throw new ApiError('not_found',404);this.putSubmission({...sub,analysis,analysisStatus:status});}
+ async reviewAnalysis(id:string,input:ReviewInput,actor:string):Promise<void>{const sub=this.submission(id);if(!sub)throw new ApiError('not_found',404);if(!sub.analysis)throw new ApiError('invalid_input');this.transaction(()=>{this.putSubmission({...sub,analysis:{...sub.analysis!,...input,reviewed:true,reviewNeeded:false}});this.audit('analysis.reviewed',id,actor);});}
+ async consumeRateLimit(key:string,scope:string,limit:number,windowMs:number):Promise<boolean>{return this.transaction(()=>{const now=Date.now();const row=this.db.prepare('SELECT window_start,count FROM rate_limits WHERE key=? AND scope=?').get(key,scope) as {window_start:number;count:number}|undefined;if(!row||now-row.window_start>=windowMs){this.db.prepare('INSERT INTO rate_limits VALUES(?,?,?,1) ON CONFLICT(key,scope) DO UPDATE SET window_start=excluded.window_start,count=1').run(key,scope,now);return true;}if(row.count>=limit)return false;this.db.prepare('UPDATE rate_limits SET count=count+1 WHERE key=? AND scope=?').run(key,scope);return true;});}
+}

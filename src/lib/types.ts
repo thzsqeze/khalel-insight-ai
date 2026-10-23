@@ -24,7 +24,7 @@ export interface Analysis {
   sensitiveData: boolean;
   confidence: number;
   reviewNeeded: boolean;
-  source: "demo" | "openai";
+  source: "openai";
   reviewed: boolean;
 }
 export interface Submission {
@@ -66,8 +66,8 @@ export interface StatusEvent {
   createdAt: string;
 }
 export interface SimilarReport { submission: Submission; similarity: number; }
-export interface AdminSnapshot { submissions: Submission[]; issues: Issue[]; events: StatusEvent[]; demo: boolean; }
+export interface AdminSnapshot { submissions: Submission[]; issues: Issue[]; events: StatusEvent[]; }
 export interface IssueDetail { issue: Issue; submissions: Submission[]; events: StatusEvent[]; similar: SimilarReport[]; }
 export interface PublicIssue { id: string; title: string; titleKk?: string; category: Category; status: Status; count: number; publicSummary: string; updatedAt: string; }
 export interface TrackingResult { reference: string; category: Category; status: Status; createdAt: string; events: { status: Status; createdAt: string }[]; }
-export interface AdminSession { id: string; email: string; role: "admin" | "moderator"; demo: boolean; }
+export interface AdminSession { id: string; email: string; role: "admin" | "moderator"; }

@@ -3,14 +3,12 @@ import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { categories, priorities, type Analysis, type Submission } from '@/lib/types';
-import { isDemoMode } from './config';
 import { redactForAI } from './security';
 const analysisSchema=z.object({category:z.enum(categories),summary:z.string(),keywords:z.array(z.string()),urgency:z.enum(priorities),sensitiveData:z.boolean(),confidence:z.number()});
 export type AnalysisResult={analysis:Analysis|null;status:Submission['analysisStatus'];embedding?:number[]};
 export async function analyzeSubmission(submission:Submission):Promise<AnalysisResult>{
  if(!submission.aiConsent)return {analysis:null,status:'skipped'};
  const redacted=redactForAI(submission.description);
- if(isDemoMode())return {status:'completed',analysis:{category:submission.category,summary:submission.locale==='kk'?'Оқу ортасын жақсарту туралы өтініш. Модератордың тексеруі қажет.':'Обращение об улучшении учебной среды. Требуется проверка модератором.',keywords:[submission.category],urgency:'medium',sensitiveData:redacted.sensitiveData,confidence:0.64,reviewNeeded:true,source:'demo',reviewed:false}};
  if(!redacted.safe||!redacted.text||!process.env.OPENAI_API_KEY)return {analysis:null,status:'failed'};
  try{
   const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY,timeout:20000,maxRetries:0});

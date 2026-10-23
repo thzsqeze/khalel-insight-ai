@@ -172,7 +172,7 @@ begin
   select * into report from public.submissions where id=(p_payload->>'submissionId')::uuid for update;
   if not found then raise exception 'not_found';end if;
   if report.issue_id is not null then raise exception 'invalid_input';end if;
-  insert into public.issues(reference,title,category) values('ISS-'||upper(encode(extensions.gen_random_bytes(5),'hex')),p_payload->>'title',(p_payload->>'category')::public.feedback_category) returning id into target;
+  insert into public.issues(reference,title,category) values('UV-'||upper(encode(extensions.gen_random_bytes(5),'hex')),p_payload->>'title',(p_payload->>'category')::public.feedback_category) returning id into target;
   update public.submissions set issue_id=target where id=report.id;
   return target;
  elsif p_action='patch_issue' then

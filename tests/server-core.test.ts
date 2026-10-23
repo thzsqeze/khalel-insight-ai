@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { feedbackSchema, issuePatchSchema } from '@/lib/server/validation';
-import { createTrackingCode, hashTrackingCode, redactForAI, signDemoSession, verifyDemoSession } from '@/lib/server/security';
+import { createTrackingCode, hashTrackingCode, redactForAI } from '@/lib/server/security';
 const input = {role:'student', category:'education', description:'Не хватает практических занятий по предмету.', locale:'ru', consent:true, aiConsent:false, startedAt:Date.now()-5000};
 describe('server validation and privacy', () => {
  it('accepts anonymous submissions without faculty or identity', () => expect(feedbackSchema.parse(input).faculty).toBeUndefined());
@@ -16,12 +16,5 @@ describe('server validation and privacy', () => {
   const result=redactForAI('Меня зовут Иван Петров, почта student@example.com и телефон +7 777 123 45 67.');
   expect(result.text).not.toMatch(/Иван|Петров|student@|777/);expect(result.sensitiveData).toBe(true);
   expect(redactForAI('Преподаватель Айгүл обратилась ко мне.').safe).toBe(false);
- });
- it('rejects forged, expired, and production demo sessions', () => {
-  const secret='a'.repeat(64);const token=signDemoSession(secret,Date.now()+10000);
-  expect(verifyDemoSession(token,secret,true)).toBe(true);
-  expect(verifyDemoSession(token+'x',secret,true)).toBe(false);
-  expect(verifyDemoSession(signDemoSession(secret,Date.now()-1),secret,true)).toBe(false);
-  expect(verifyDemoSession(token,secret,false)).toBe(false);
  });
 });
