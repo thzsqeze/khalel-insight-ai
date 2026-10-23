@@ -198,7 +198,7 @@
     "requiredOnly": "Тек қажетті cookie",
     "allowDiagnostics": "Диагностикаға рұқсат беру",
     "settings": "Cookie баптаулары",
-    "close": "Cookie баптауларын жабу",
+    "close": "Тек қажетті cookie қалдырып, жабу",
     "requiredTitle": "Қажетті cookie — әрқашан қосулы.",
     "requiredDescription": "Интерфейс тілі, қызметкерлердің кіру сессиясы және осы таңдау сақталады. Диагностикадан бас тарту бұл cookie файлдарын жоймайды.",
     "diagnosticsTitle": "Диагностика — ерікті түрде.",

@@ -4,7 +4,7 @@ import kk from "../src/messages/admin-kk.json";
 
 const consentName = "univoice_cookie_consent";
 
-test("required-only choice persists and preserves language and session cookies", async ({ page, context, baseURL }) => {
+test("closing the popup saves required-only consent and preserves language and session cookies", async ({ page, context, baseURL }) => {
   await context.addCookies([
     { name: "locale", value: "kk", url: baseURL!, sameSite: "Lax" },
     { name: "sb-cookie-test-auth-token", value: "untouched-session", url: baseURL!, httpOnly: true, sameSite: "Lax" },
@@ -12,7 +12,7 @@ test("required-only choice persists and preserves language and session cookies",
   await page.goto("/");
   const banner = page.getByRole("region", { name: kk.cookies.title, exact: true });
   await expect(banner).toBeVisible();
-  await banner.getByRole("button", { name: kk.cookies.requiredOnly, exact: true }).click();
+  await banner.getByRole("button", { name: kk.cookies.close, exact: true }).click();
   await expect(banner).toHaveCount(0);
   await page.reload();
   await expect(banner).toHaveCount(0);
@@ -76,6 +76,9 @@ test("failed cookie persistence keeps the choice visible with an actionable erro
   await page.goto("/");
   const banner = page.getByRole("region", { name: ru.cookies.title, exact: true });
   await banner.getByRole("button", { name: ru.cookies.allowDiagnostics, exact: true }).click();
+  await expect(banner).toBeVisible();
+  await expect(banner.getByRole("alert")).toHaveText(ru.cookies.saveError);
+  await banner.getByRole("button", { name: ru.cookies.close, exact: true }).click();
   await expect(banner).toBeVisible();
   await expect(banner.getByRole("alert")).toHaveText(ru.cookies.saveError);
 });

@@ -37,7 +37,8 @@ test("Sentry sends only sanitized errors after consent and stops after revocatio
   expect(event.tags.diagnostics_source).toBe("browser");
 
   await page.getByRole("button", { name: ru.cookies.settings, exact: true }).click();
-  await page.getByRole("button", { name: ru.cookies.requiredOnly, exact: true }).click();
+  await page.getByRole("button", { name: ru.cookies.close, exact: true }).click();
+  await expect(page.getByRole("region", { name: ru.cookies.title, exact: true })).toHaveCount(0);
   await trigger("PRIVATE_REPORT_after_revocation");
   await page.waitForTimeout(600);
   expect(sent).toHaveLength(1);

@@ -86,7 +86,7 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
       <div className="flex items-center gap-2">
         <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#dce8bd] text-primary" aria-hidden="true"><ShieldCheck className="size-4" strokeWidth={1.6} /></span>
         <h2 id="cookie-settings-title" ref={heading} tabIndex={-1} className="min-w-0 flex-1 text-sm font-semibold leading-5 text-primary focus:outline-none">{t("title")}</h2>
-        {opened && consent !== null && <button type="button" aria-label={t("close")} onClick={closeSettings} className="grid min-h-9 min-w-9 place-items-center rounded-md text-primary hover:bg-[#dfe5d5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><X className="size-4" /></button>}
+        <button type="button" aria-label={t("close")} title={t("close")} onClick={() => save("required")} className="grid min-h-9 min-w-9 shrink-0 place-items-center rounded-md text-primary hover:bg-[#dfe5d5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><X className="size-4" aria-hidden="true" /></button>
       </div>
       <div className="mt-2 text-xs leading-5 text-[#515b4a]">
         <p>{t("description")} <Link href="/privacy" className="font-medium text-primary underline underline-offset-4">{t("privacyLink")}</Link></p>
