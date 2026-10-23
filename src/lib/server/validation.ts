@@ -1,0 +1,12 @@
+import { z } from 'zod';
+import { categories, priorities, statuses } from '@/lib/types';
+import { hasContactDetails } from './security';
+const clean=z.string().trim();
+export const feedbackSchema=z.object({role:z.enum(['student','teacher']),category:z.enum(categories),description:clean.min(20).max(5000),faculty:clean.max(120).optional(),locale:z.enum(['ru','kk']),consent:z.literal(true),aiConsent:z.boolean(),website:z.literal('').optional(),startedAt:z.number().finite().refine(value=>Date.now()-value>=2000&&Date.now()-value<=24*60*60*1000)}).strict();
+export const issueCreateSchema=z.object({submissionId:z.uuid(),title:clean.min(5).max(180),category:z.enum(categories)}).strict();
+export const issuePatchSchema=z.object({title:clean.min(5).max(180).optional(),category:z.enum(categories).optional(),status:z.enum(statuses).optional(),priority:z.enum(priorities).optional(),owner:clean.max(120).nullable().optional(),publicSummary:clean.min(10).max(1000).refine(value=>!hasContactDetails(value)).nullable().optional(),published:z.boolean().optional(),resolutionNote:clean.max(2000).nullable().optional()}).strict().refine(value=>Object.keys(value).length>0);
+export const reviewSchema=z.object({category:z.enum(categories),summary:clean.min(10).max(1000).refine(value=>!hasContactDetails(value)),urgency:z.enum(priorities)}).strict();
+export const memberSchema=z.object({submissionId:z.uuid(),action:z.enum(['add','remove'])}).strict();
+export type IssuePatch=z.infer<typeof issuePatchSchema>;
+export type IssueCreate=z.infer<typeof issueCreateSchema>;
+export type ReviewInput=z.infer<typeof reviewSchema>;
