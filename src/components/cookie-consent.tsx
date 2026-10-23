@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createContext, useContext, useRef, useState, useSyncExternalStore } from "react";
 import { Settings2, ShieldCheck, X } from "lucide-react";
@@ -36,7 +35,6 @@ const ConsentContext = createContext<{ openSettings: (trigger: HTMLButtonElement
 
 export function CookieConsentProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("cookies");
-  const pathname = usePathname();
   const snapshot = useSyncExternalStore(subscribeToConsent, getConsentSnapshot, getServerConsentSnapshot);
   const [opened, setOpened] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -54,7 +52,6 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
     setSaveError(false);
     requestAnimationFrame(() => {
       heading.current?.focus({ preventScroll: true });
-      heading.current?.scrollIntoView({ block: "start", behavior: "instant" });
     });
   }
 
@@ -62,8 +59,8 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
     setOpened(false);
     // The admin menu may have closed after opening these nonmodal settings.
     const trigger = opener.current;
-    if (trigger && trigger.getBoundingClientRect().right > 0) trigger.focus();
-    else if (fallbackOpener.current) document.getElementById(fallbackOpener.current)?.focus();
+    if (trigger && trigger.getBoundingClientRect().right > 0) trigger.focus({ preventScroll: true });
+    else if (fallbackOpener.current) document.getElementById(fallbackOpener.current)?.focus({ preventScroll: true });
   }
 
   function save(next: CookieConsent) {
@@ -85,8 +82,8 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
   const choiceClass = "min-h-11 rounded-lg border border-primary bg-[#fffefa] px-4 py-3 text-xs font-semibold leading-5 text-primary transition hover:bg-[#e9ede5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
   return <ConsentContext.Provider value={{ openSettings, isOpen }}>
-    {isOpen && <section id="cookie-settings" aria-labelledby="cookie-settings-title" className={cn("border-b border-[#cbd4c4] bg-[#eef1e8] text-foreground", pathname.startsWith("/admin") && "lg:ml-[232px]")}>
-      <div className="mx-auto max-w-[1320px] px-5 py-5 sm:px-8 lg:px-12">
+    {isOpen && <section id="cookie-settings" aria-labelledby="cookie-settings-title" className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[60] mx-auto max-h-[80dvh] max-w-5xl overflow-y-auto overscroll-contain rounded-2xl border border-[#cbd4c4] bg-[#eef1e8] text-foreground shadow-[0_12px_48px_rgba(31,49,39,0.18)] sm:inset-x-6 sm:bottom-6">
+      <div className="px-4 py-4 sm:px-6 sm:py-5">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#dce8bd] text-primary" aria-hidden="true"><ShieldCheck className="size-[18px]" strokeWidth={1.6} /></span>
           <div className="min-w-0 flex-1">
@@ -94,7 +91,7 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
               <h2 id="cookie-settings-title" ref={heading} tabIndex={-1} className="text-sm font-semibold leading-7 text-primary focus:outline-none">{t("title")}</h2>
               {opened && consent !== null && <button type="button" aria-label={t("close")} onClick={closeSettings} className="grid min-h-9 min-w-9 place-items-center rounded-md text-primary hover:bg-[#dfe5d5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><X className="size-4" /></button>}
             </div>
-            <div className="mt-1 grid gap-4 xl:grid-cols-[1fr_auto] xl:items-center xl:gap-8">
+            <div className="mt-1 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-6">
               <div className="max-w-2xl text-xs leading-6 text-[#515b4a]">
                 <p>{t("description")} <Link href="/privacy" className="font-medium text-primary underline underline-offset-4">{t("privacyLink")}</Link></p>
                 {opened && <div className="mt-3 space-y-2">
@@ -104,7 +101,7 @@ export function CookieConsentProvider({ children }: { children: React.ReactNode 
                 </div>}
                 <p className="mt-1 text-[11px]">{t("retention")}</p>
               </div>
-              <div className="grid w-full gap-2 sm:grid-cols-2 xl:w-[400px]">
+              <div className="grid w-full gap-2 sm:grid-cols-2 lg:w-[340px]">
                 <button type="button" className={choiceClass} onClick={() => save("required")}>{t("requiredOnly")}</button>
                 <button type="button" className={choiceClass} onClick={() => save("diagnostics")}>{t("allowDiagnostics")}</button>
               </div>
