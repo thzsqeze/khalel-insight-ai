@@ -24,7 +24,9 @@ where id = '<verified-auth-user-uuid>';
 
 Then sign in at `/login` and confirm `/api/admin/overview` returns the empty database. A profile role cannot be granted through signup metadata or from the browser. Provision additional moderators explicitly with the `moderator` role. There are no default credentials, seed accounts or fake metrics.
 
-The hosted UniVoice project `wgagyfqxsmsjtajdtmpb` is active in `eu-central-1`. Its two migrations are applied and the first administrator exists. The deployment was checked with transactional RLS assertions and a real application login → submission → tracking → issue → status-change journey. Temporary records were removed. Local server credentials are in ignored `.env.local`; initial administrator access is in ignored `.data/admin-access.json` with owner-only file permissions. Neither file belongs in Git. Public hosting and OpenAI remain unconfigured.
+The hosted UniVoice project `wgagyfqxsmsjtajdtmpb` is active in `eu-central-1`. Its two migrations are applied and the first administrator exists. The integration was checked with transactional RLS assertions and a real application login → submission → tracking → issue → status-change journey. Temporary records were removed. Local server credentials are in ignored `.env.local`; initial administrator access is in ignored `.data/admin-access.json` with owner-only file permissions. Neither file belongs in Git. Public hosting is `https://khalel-insight-ai.vercel.app` in Vercel team `kai-6ade`; the owner selected this prepared database for the hosted site. OpenAI remains unconfigured.
+
+The hosting runtime logs missing configuration names and failed database error codes with the Supabase hostname. Database messages, details, hints, report text and credentials are excluded. These operational logs are separate from optional consent-gated Sentry events. When diagnosing an environment change, compare the running deployment's hostname with the intended database, and check both build-time and runtime configuration. Do not log environment values or provider error objects.
 
 ## Security and privacy boundaries
 

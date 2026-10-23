@@ -59,7 +59,7 @@ Only exception type, a fixed generic message, sanitized source file locations, v
 
 For optional private source-map upload during builds, set `SENTRY_ORG`, `SENTRY_PROJECT` and a build-only `SENTRY_AUTH_TOKEN`. Without the token, errors still arrive but production stacks may remain minified. The token must never use a `NEXT_PUBLIC_` prefix or be committed. SDK build telemetry and automatic instrumentation are disabled. No test-error page is exposed by the application.
 
-The `univoice` project in Sentry organization `apple-94` is configured locally. Connection and privacy verification events were received on 23 October 2026; alert creation was left off. The first connection test exposed Sentry’s automatic IP inference, which was then disabled and checked with a fresh event. Existing events are not retroactively scrubbed by these settings. A source-map upload token and public hosting deployment are not configured. Hosting needs the environment variables separately; ignored local values are not pushed to GitHub.
+The `univoice` project in Sentry organization `apple-94` is configured locally and on Vercel. Connection and privacy verification events were received on 23 October 2026; alert creation was left off. The first connection test exposed Sentry’s automatic IP inference, which was then disabled and checked with a fresh event. Existing events are not retroactively scrubbed by these settings. A source-map upload token is not configured. Hosting environment variables are configured separately; ignored local values are not pushed to GitHub.
 
 ## Checks
 
@@ -80,13 +80,17 @@ The production build uses the supported Webpack compiler because some desktop sa
 
 ## Deployment
 
+Public URL: **https://khalel-insight-ai.vercel.app/**. The existing Vercel project is `kai-6ade/khalel-insight-ai`, connected to the `main` branch of `thzsqeze/khalel-insight-ai`. The repository and hosting identifiers retain their original names; the product is UniVoice.
+
 Set the variables from `.env.example` in your hosting environment. Use the exact HTTPS `APP_ORIGIN`, keep `SUPABASE_SECRET_KEY` server-only and configure `TRUSTED_IP_HEADER` only when your ingress overwrites it. Legacy Supabase anon/service-role keys remain supported. OpenAI is optional. Deploy on the Node runtime (Node 24 recommended) with `pnpm build`.
+
+Production uses `APP_ORIGIN=https://khalel-insight-ai.vercel.app`, `TRUSTED_IP_HEADER=x-vercel-forwarded-for` and the prepared Supabase project `wgagyfqxsmsjtajdtmpb`, as selected by the owner. URL and publishable keys are Vercel Config variables; service keys and the rate-limit salt are Secrets. All Supabase URL/key aliases must refer to the same project. Public values are read through direct `process.env.NEXT_PUBLIC_*` references so Next.js can include them during the build. Rebuild after changing them.
 
 Full setup, roles, privacy boundaries and operations: [docs/backend.md](docs/backend.md).
 
 ## Current integration status and limitations
 
-The hosted **UniVoice** project (`wgagyfqxsmsjtajdtmpb`, Frankfurt / `eu-central-1`) is provisioned. Both migrations are applied and their local version numbers match the remote history. The first administrator is created; local credentials and keys are stored only in ignored files. Supabase RLS assertions, real login, feedback persistence, private tracking, issue creation and status changes were verified on 23 October 2026. The temporary verification report and its issue/history were removed; the database has zero reports and zero issues. No sample data was migrated from the former local demo. OpenAI and a public hosting deployment remain unconfigured.
+The hosted **UniVoice** project (`wgagyfqxsmsjtajdtmpb`, Frankfurt / `eu-central-1`) is provisioned. Both migrations are applied and their local version numbers match the remote history. The first administrator is created; local credentials and keys are stored only in ignored files. Supabase RLS assertions, real login, feedback persistence, private tracking, issue creation and status changes were verified on 23 October 2026. The temporary verification report and its issue/history were removed. No sample data was migrated from the former local demo. Public hosting is on Vercel; OpenAI remains unconfigured.
 
 Attachments, email notifications, a retention scheduler, automatic retry queue, deletion UI and MFA management UI are not included. Interrupted AI processing can be retried manually. Pattern-based personal-data detection is conservative and incomplete; public summaries need human review. Authorized moderators can read raw reports. The institution must set its privacy, retention and access rules before collecting feedback.
 
