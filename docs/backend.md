@@ -4,7 +4,7 @@ The application uses Supabase for all persisted data and Supabase Auth for admin
 
 ## Production setup
 
-1. Create a Supabase project with PostgreSQL and pgvector support. Apply `supabase/migrations/202610230001_initial.sql` through the Supabase CLI or SQL editor. The migration is one transaction and intended for an empty application schema.
+1. Create a Supabase project with PostgreSQL and pgvector support. Apply `supabase/migrations/20261023112811_initial.sql` through the Supabase CLI or SQL editor. The migration is one transaction and intended for an empty application schema.
 2. Set `APP_ORIGIN` to the exact application origin (HTTPS in production), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `SUPABASE_SECRET_KEY`. Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` are accepted as fallback. Do not expose a secret/service key in a `NEXT_PUBLIC_*` variable. Store local credentials in the ignored `.env.local`.
 3. Create administrator identities through trusted Supabase administration. The auth trigger always creates a `viewer` profile, ignoring user metadata. Grant the chosen role with an operator SQL connection: `update public.profiles set role = 'admin' where id = '<verified-auth-user-uuid>';`. Disable public signups if the deployment does not need them. End users submitting reports never need an auth identity.
 4. Configure a random `RATE_LIMIT_SALT` and `TRUSTED_IP_HEADER` only when the ingress overwrites that header. On Vercel, use `x-vercel-forwarded-for`. Without an explicitly trusted header, requests share a conservative global rate-limit bucket. Never pass a client-provided forwarding header through unchanged.
@@ -24,7 +24,7 @@ where id = '<verified-auth-user-uuid>';
 
 Then sign in at `/login` and confirm `/api/admin/overview` returns the empty database. A profile role cannot be granted through signup metadata or from the browser. Provision additional moderators explicitly with the `moderator` role. There are no default credentials, seed accounts or fake metrics.
 
-Hosted project provisioning, migration execution and the first account remain pending account authorization. Do not treat a successful local build as proof of a live connection.
+The hosted UniVoice project `wgagyfqxsmsjtajdtmpb` is active in `eu-central-1`. Its two migrations are applied and the first administrator exists. The deployment was checked with transactional RLS assertions and a real application login → submission → tracking → issue → status-change journey. Temporary records were removed. Local server credentials are in ignored `.env.local`; initial administrator access is in ignored `.data/admin-access.json` with owner-only file permissions. Neither file belongs in Git. Public hosting and OpenAI remain unconfigured.
 
 ## Security and privacy boundaries
 
@@ -41,3 +41,15 @@ AI runs only with separate consent. Email, phone, long numeric identifiers, URLs
 ## Operational limits
 
 No automatic retry worker, email delivery, attachment storage, MFA UI, export pipeline, report deletion UI, or scheduled retention purge is included. Plan retention periods and operator procedures before collecting real reports; audit records intentionally contain changed field names rather than duplicated raw text. Keep raw reports and embeddings in access-controlled storage. Remove obsolete rate-limit buckets periodically with an operator job (`delete from public.rate_limits where window_start < now() - interval '2 days'`). The administrator snapshot fetches all records with paging, suitable for an MVP; larger deployments should use SQL aggregate endpoints and cursor pagination. Supabase/live-provider integration must be checked with real deployment credentials before launch.
+
+## Hosted verification notes
+
+The schema migrations in this repository use the actual versions recorded by Supabase. Migration `optimize_staff_policies_and_actor_indexes` adds indexes for actor/reviewer foreign keys and evaluates authenticated role checks once per statement. The performance advisor now only reports indexes unused by this new, empty database.
+
+Security advisor notices were reviewed against the access design and RLS assertions:
+
+- `rate_limits` deliberately has RLS with no client policy: only service operations can access it. [RLS with no policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
+- `public_issues()` deliberately permits anonymous and authenticated execution of a security-definer function; it returns only reviewed public fields for groups of at least three reports. [Anonymous security-definer execution](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable).
+- `is_staff()` deliberately permits authenticated execution to support read policies; it returns a boolean for the current verified identity. [Authenticated security-definer execution](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable).
+
+These functions have fixed search paths and restricted grants. Private tables, service-only mutation functions and public-field projections were exercised by `supabase/tests/rls.sql`; its fixtures are rolled back.

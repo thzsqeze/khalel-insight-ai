@@ -6,7 +6,7 @@ UniVoice is a Russian/Kazakh anonymous feedback and issue-resolution platform fo
 
 Requirements: Node.js **22.13+** (Node 24 recommended), pnpm 11.
 
-1. Create a Supabase project and apply `supabase/migrations/202610230001_initial.sql` to its empty application schema.
+1. Create a Supabase project and apply `supabase/migrations/20261023112811_initial.sql` to its empty application schema.
 2. Copy `.env.example` to `.env.local`. Set the Supabase URL, publishable key, server-only secret key, exact `APP_ORIGIN` and random `RATE_LIMIT_SALT`.
 3. Create a trusted Supabase Auth identity, then grant its profile the `admin` role through an operator SQL connection. See [backend setup](docs/backend.md). No public administrator registration is provided.
 4. Run:
@@ -60,7 +60,7 @@ pnpm test:e2e
 
 Vitest covers validation, privacy, analytics, authorization, real-repository failure/empty behavior, session refresh and rejection of the removed demo bypass. A blank SQLite adapter exists only under `tests/fixtures` for isolated repository contract tests; it is never imported by the application.
 
-Playwright starts the regular application on port 3100, or uses `PW_BASE_URL` when supplied. Browser smoke tests exercise localization, login protection, topic preselection, explicit consents and mobile navigation without creating records. The SQL RLS assertions in `supabase/tests/rls.sql` require a migrated Supabase test database; their transactional fixtures are rolled back. Live authenticated submission/tracking/administration still requires verification against configured services.
+Playwright starts the regular application on port 3100, or uses `PW_BASE_URL` when supplied. Browser smoke tests exercise localization, login protection, topic preselection, explicit consents and mobile navigation without creating records. The SQL RLS assertions in `supabase/tests/rls.sql` require a migrated Supabase test database; their transactional fixtures are rolled back. The optional live administrator test uses `UNIVOICE_LIVE_ADMIN_FILE` pointing to a private JSON file with `email`, `password` and `projectUrl`; it disables authentication traces. Use `PW_BASE_URL=http://127.0.0.1:3000` when the local app is already running.
 
 The production build uses the supported Webpack compiler because some desktop sandboxes restrict Turbopack build workers. Development uses Turbopack.
 
@@ -72,7 +72,7 @@ Full setup, roles, privacy boundaries and operations: [docs/backend.md](docs/bac
 
 ## Current integration status and limitations
 
-The Supabase schema and application adapter are ready in this repository. A hosted project, its migration and the first administrator have **not yet been provisioned or verified**; account authorization is pending. No sample data is migrated from the former local demo.
+The hosted **UniVoice** project (`wgagyfqxsmsjtajdtmpb`, Frankfurt / `eu-central-1`) is provisioned. Both migrations are applied and their local version numbers match the remote history. The first administrator is created; local credentials and keys are stored only in ignored files. Supabase RLS assertions, real login, feedback persistence, private tracking, issue creation and status changes were verified on 23 October 2026. The temporary verification report and its issue/history were removed; the database has zero reports and zero issues. No sample data was migrated from the former local demo. OpenAI and a public hosting deployment remain unconfigured.
 
 Attachments, email notifications, a retention scheduler, automatic retry queue, deletion UI and MFA management UI are not included. Interrupted AI processing can be retried manually. Pattern-based personal-data detection is conservative and incomplete; public summaries need human review. Authorized moderators can read raw reports. The institution must set its privacy, retention and access rules before collecting feedback.
 
