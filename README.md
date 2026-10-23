@@ -27,6 +27,8 @@ Open **http://localhost:3000** (or set `APP_ORIGIN=http://127.0.0.1:3000` when u
 - Supabase Auth with verified server-side roles, session refresh, PostgreSQL RLS, audit history, atomic mutations and pgvector similarity.
 - Zod validation, honeypot, body limits, durable rate limits, same-origin checks, hashed 192-bit tracking tokens and server-only secrets.
 - Separate optional AI consent, OpenAI classification/embeddings, local redaction, output validation and administrator retry. Provider failures retain the report without inventing analysis.
+- Russian/Kazakh cookie settings, necessary-only or optional error diagnostics, 180-day preference, cross-tab updates and consent withdrawal without changing login or language cookies.
+- Sentry browser, React and server/API error reporting with request-specific consent and a strict payload allowlist. Session replay, behavior analytics, tracing, logs and metrics are disabled.
 
 Students and teachers submit without accounts. The private receipt code is needed to track status. Public progress includes only human-reviewed summaries of groups with at least three reports, never raw complaint text.
 
@@ -46,6 +48,18 @@ The active language selects its matching name, falling back to `ORGANIZATION_NAM
 This MVP supports **one university per deployment and database**. Use separate Supabase projects for separate institutions. Shared-database tenant isolation and institution switching are not implemented. The existing GitHub repository URL is retained; the product and package name are UniVoice.
 
 Design references and decisions: [docs/univoice-design.md](docs/univoice-design.md).
+
+## Cookies and Sentry
+
+`univoice_cookie_consent` stores `v1.required` or `v1.diagnostics` for 180 days (`Path=/`, `SameSite=Lax`, `Secure` on HTTPS). Until a valid diagnostics choice exists, browser diagnostics remain off. Preferences can be reopened from the public footer, privacy page or administrator sidebar. Language and authentication cookies remain available with either choice. AI consent on the feedback form is independent.
+
+Set `NEXT_PUBLIC_SENTRY_DSN` for browser diagnostics and `SENTRY_DSN` for the server (the latter falls back to the public DSN). A DSN is an ingestion address, not an administrative credential. Restart development or rebuild production after changing the public DSN. On each server request, the raw Cookie header must contain exactly one valid diagnostics choice. Missing, malformed, ambiguous or withdrawn choices prevent reporting. Errors are never saved for later delivery after consent.
+
+Only exception type, a fixed generic message, sanitized source file locations, validated source-map IDs and an internal source tag are retained. Error text, report contents, identities, cookies, headers, request bodies, URL parameters, breadcrumbs and arbitrary context are removed. Sentry SDK v11 data collection is explicitly disabled by category. Every event uses the fixed unspecified IP `0.0.0.0` to prevent Sentry from inferring a visitor IP from the connection. For each new Sentry project, also enable **Prevent Storing of IP Addresses** and add the advanced scrubbing rule `[Remove] [Anything] from [$user.geo.**]`; these settings are enabled on the configured UniVoice project. The browser checks consent again immediately before dispatch; withdrawal prevents future events but cannot recall a request already sent.
+
+For optional private source-map upload during builds, set `SENTRY_ORG`, `SENTRY_PROJECT` and a build-only `SENTRY_AUTH_TOKEN`. Without the token, errors still arrive but production stacks may remain minified. The token must never use a `NEXT_PUBLIC_` prefix or be committed. SDK build telemetry and automatic instrumentation are disabled. No test-error page is exposed by the application.
+
+The `univoice` project in Sentry organization `apple-94` is configured locally. Connection and privacy verification events were received on 23 October 2026; alert creation was left off. The first connection test exposed Sentry’s automatic IP inference, which was then disabled and checked with a fresh event. Existing events are not retroactively scrubbed by these settings. A source-map upload token and public hosting deployment are not configured. Hosting needs the environment variables separately; ignored local values are not pushed to GitHub.
 
 ## Checks
 
