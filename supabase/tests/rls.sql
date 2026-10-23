@@ -75,4 +75,4 @@ do $$declare value jsonb;begin
 end$$;
 reset role;
 rollback;
-\echo 'All Khalel privacy, role, publication, tracking, audit, and rate-limit tests passed.'
+\echo 'All UniVoice privacy, role, publication, tracking, audit, and rate-limit tests passed.'

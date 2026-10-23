@@ -1,4 +1,4 @@
--- Khalel Insight AI: run once on a Supabase PostgreSQL database.
+-- UniVoice: run once on a Supabase PostgreSQL database.
 -- The service key belongs only in the server runtime. Public writes go through
 -- the application's consent, CSRF, size, validation, and rate-limit boundary.
 begin;

@@ -8,7 +8,7 @@ import { sessionClient } from './supabase';
 import { ApiError } from './errors';
 const demoCookie='khalel_demo_session';
 export async function getAdminSession():Promise<AdminSession|null>{
- if(isDemoMode()){const jar=await cookies();const token=jar.get(demoCookie)?.value;if(token&&verifyDemoSession(token,demoRepository().sessionSecret(),true))return {id:'demo-admin',email:'demo@khalel.local',role:'admin',demo:true};return null;}
+ if(isDemoMode()){const jar=await cookies();const token=jar.get(demoCookie)?.value;if(token&&verifyDemoSession(token,demoRepository().sessionSecret(),true))return {id:'demo-admin',email:'demo@univoice.local',role:'admin',demo:true};return null;}
  try{const client=await sessionClient();const {data:{user},error}=await client.auth.getUser();if(error||!user)return null;const {data:profile,error:profileError}=await client.from('profiles').select('role').eq('id',user.id).single();if(profileError||!profile||!['admin','moderator'].includes(profile.role))return null;return {id:user.id,email:user.email??'',role:profile.role as AdminSession['role'],demo:false};}catch{return null;}
 }
 export async function requireAdmin(){const session=await getAdminSession();if(!session)throw new ApiError('unauthorized',401);return session;}
