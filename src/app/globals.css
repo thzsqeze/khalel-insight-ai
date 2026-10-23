@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #f7f9fb;
-  --color-foreground: #172a35;
-  --color-primary: #087f72;
+  --color-background: #f6f5f1;
+  --color-foreground: #242722;
+  --color-primary: #315747;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #edf5f3;
-  --color-secondary-foreground: #09695f;
-  --color-muted: #f1f5f7;
-  --color-muted-foreground: #687984;
-  --color-border: #e5ebee;
+  --color-secondary: #e9ede5;
+  --color-secondary-foreground: #315747;
+  --color-muted: #efeee9;
+  --color-muted-foreground: #72776c;
+  --color-border: #dedfd7;
   --color-card: #ffffff;
-  --color-card-foreground: #172a35;
-  --color-accent: #eaf5f1;
-  --color-accent-foreground: #087f72;
-  --color-ring: #087f72;
+  --color-card-foreground: #242722;
+  --color-accent: #e9ede5;
+  --color-accent-foreground: #315747;
+  --color-ring: #315747;
   --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -23,15 +23,16 @@ body { margin: 0; background: var(--color-background); color: var(--color-foregr
 button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled), select { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
-::selection { background: #bcE9db; color: #134e4a; }
+::selection { background: #dce8bd; color: #242722; }
+a:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 4px; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primary); }
 input, select, textarea { font: inherit; }
 html { scroll-behavior: smooth; }
 .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-.admin-table th { padding: 13px 20px; color: #7b8a94; font-size: 11px; font-weight: 500; background: #fafbfc; border-block: 1px solid #edf0f2; white-space: nowrap; }
-.admin-table td { padding: 16px 20px; border-bottom: 1px solid #edf0f2; font-size: 12px; }
+.admin-table th { padding: 13px 20px; color: #72776c; font-size: 11px; font-weight: 500; background: #f7f7f3; border-block: 1px solid var(--color-border); white-space: nowrap; }
+.admin-table td { padding: 17px 20px; border-bottom: 1px solid #e8e9e2; font-size: 12px; }
 .admin-table tr:last-child td { border-bottom: 0; }
-.admin-table tbody tr:hover { background: #fbfdfd; }
+.admin-table tbody tr:hover { background: #f8f9f5; }
 .recharts-wrapper:focus, .recharts-surface:focus { outline: none; }
-.recharts-default-tooltip { border-radius: 10px !important; border-color: #e5ebee !important; font-size: 12px; }
+.recharts-default-tooltip { border-radius: 5px !important; border-color: var(--color-border) !important; font-size: 12px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
