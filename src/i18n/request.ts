@@ -1,3 +1,5 @@
+import analyticsRu from "@/messages/analytics-ru.json";
+import analyticsKk from "@/messages/analytics-kk.json";
 import teamRu from "@/messages/team-ru.json";
 import teamKk from "@/messages/team-kk.json";
 import ticketsRu from "@/messages/tickets-ru.json";
@@ -14,8 +16,8 @@ export default getRequestConfig(async () => {
   const locale = cookieStore.get("locale")?.value === "kk" ? "kk" : "ru";
   const messages =
     locale === "kk"
-      ? { ...publicKk, ...adminKk, ...teamKk, ...ticketsKk }
-      : { ...publicRu, ...adminRu, ...teamRu, ...ticketsRu };
+      ? { ...publicKk, ...adminKk, ...teamKk, ...ticketsKk, ...analyticsKk }
+      : { ...publicRu, ...adminRu, ...teamRu, ...ticketsRu, ...analyticsRu };
   return {
     locale,
     timeZone: "Asia/Atyrau",

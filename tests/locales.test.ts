@@ -1,3 +1,5 @@
+import analyticsRu from "@/messages/analytics-ru.json";
+import analyticsKk from "@/messages/analytics-kk.json";
 import teamRu from "@/messages/team-ru.json";
 import teamKk from "@/messages/team-kk.json";
 import ticketsRu from "@/messages/tickets-ru.json";
@@ -20,6 +22,7 @@ describe("complete Russian and Kazakh catalogs", () => {
   for (const [scope, ru, kk] of [
     ["public", publicRu, publicKk],
     ["admin", adminRu, adminKk],
+    ["analytics", analyticsRu, analyticsKk],
     ["team", teamRu, teamKk],
     ["tickets", ticketsRu, ticketsKk],
   ] as const) {
