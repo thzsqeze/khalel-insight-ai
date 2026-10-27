@@ -13,6 +13,23 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe("application repository uses only the real database path", () => {
+  it("uses the ticket tracking RPC while leaving the legacy deployed app RPC available", async () => {
+    let path = "";
+    let payload: Record<string, unknown> = {};
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      path = new URL(request.url).pathname;
+      payload = await request.json();
+      return new Response("null", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    });
+    await getRepository().track("x".repeat(32));
+    expect(path).toBe("/rest/v1/rpc/track_ticket_submission");
+    expect(payload.p_hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(payload)).not.toContain("x".repeat(32));
+  });
   it.each(["PGRST301", "private-content-not-a-code"])(
     "logs only an allowlisted database code for %s",
     async (code) => {

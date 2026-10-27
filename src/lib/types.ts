@@ -104,6 +104,7 @@ export interface TrackingResult {
   status: Status;
   createdAt: string;
   events: { status: Status; createdAt: string }[];
+  messages?: { id: string; kind: "reply" | "follow_up"; body: string; createdAt: string }[];
 }
 export interface AdminSession {
   id: string;

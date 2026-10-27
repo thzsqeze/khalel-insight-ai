@@ -113,7 +113,7 @@ export class ProductionRepository implements Repository {
     return data ? submission(data) : null;
   }
   async track(code: string): Promise<TrackingResult | null> {
-    const { data, error } = await this.client.rpc("track_submission", {
+    const { data, error } = await this.client.rpc("track_ticket_submission", {
       p_hash: hashTrackingCode(code),
     });
     check(error);
