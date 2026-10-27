@@ -99,6 +99,7 @@ export interface PublicIssue {
   updatedAt: string;
 }
 export interface TrackingResult {
+  access?: "conversation";
   reference: string;
   category: Category;
   status: Status;
@@ -106,6 +107,12 @@ export interface TrackingResult {
   events: { status: Status; createdAt: string }[];
   messages?: { id: string; kind: "reply" | "follow_up"; body: string; createdAt: string }[];
 }
+export interface PublicTicketStatus {
+  access: "status";
+  reference: string;
+  status: Status;
+}
+export type TrackingLookup = TrackingResult | PublicTicketStatus;
 export interface AdminSession {
   id: string;
   email: string;

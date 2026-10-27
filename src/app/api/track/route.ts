@@ -2,6 +2,10 @@ import { z } from "zod";
 import { respond, assertSameOrigin, readJson, rateLimit } from "@/lib/server/http";
 import { getRepository } from "@/lib/server/repository";
 import { ApiError } from "@/lib/server/errors";
+import {
+  isPublicTrackingReference,
+  lookupPublicTicketStatus,
+} from "@/lib/server/tracking-reference";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   return respond(async () => {
@@ -11,8 +15,13 @@ export async function POST(request: Request) {
       .object({ code: z.string().trim().min(1).max(128) })
       .strict()
       .parse(await readJson(request));
+    if (isPublicTrackingReference(code)) {
+      const result = await lookupPublicTicketStatus(code);
+      if (!result) throw new ApiError("not_found", 404);
+      return result;
+    }
     const result = await getRepository().track(code);
     if (!result) throw new ApiError("not_found", 404);
-    return result;
+    return { ...result, access: "conversation" };
   });
 }

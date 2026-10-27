@@ -12,7 +12,8 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
-import { statuses, type TrackingResult } from "@/lib/types";
+import { TrackingConversation } from "./tracking-conversation";
+import { statuses, type TrackingLookup } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
 import {
   postPublic,
@@ -29,10 +30,11 @@ export function Tracking() {
   const c = useTranslations("commonPublic");
   const locale = useLocale();
   const [code, setCode] = useState("");
+  const [activeCode, setActiveCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [validation, setValidation] = useState(false);
-  const [result, setResult] = useState<TrackingResult | null>(null);
+  const [result, setResult] = useState<TrackingLookup | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   async function lookup(event: React.FormEvent) {
     event.preventDefault();
@@ -46,7 +48,9 @@ export function Tracking() {
     setValidation(false);
     setLoading(true);
     try {
-      setResult(await postPublic<TrackingResult>("/api/track", { code: code.trim() }));
+      const submittedCode = code.trim();
+      setResult(await postPublic<TrackingLookup>("/api/track", { code: submittedCode }));
+      setActiveCode(submittedCode);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "unknown");
     } finally {
@@ -143,15 +147,19 @@ export function Tracking() {
           <section className="mt-12 rounded-xl border border-[#c3cbb9] bg-[#fffefa] p-6 sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs text-muted-foreground">
-                  {t("received", { date: formatDate(result.createdAt, locale) })}
-                </p>
+                {result.access !== "status" && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("received", { date: formatDate(result.createdAt, locale) })}
+                  </p>
+                )}
                 <h2 className="mt-2 text-xl font-semibold tracking-[-0.5px] text-foreground">
                   {t("resultTitle", { reference: result.reference })}
                 </h2>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {c(`categories.${result.category}`)}
-                </p>
+                {result.access !== "status" && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {c(`categories.${result.category}`)}
+                  </p>
+                )}
               </div>
               <StatusPill status={result.status} />
             </div>
@@ -211,7 +219,27 @@ export function Tracking() {
             <div className="mt-7 rounded-xl bg-[#eaf0e3]/60 px-4 py-3 text-xs leading-6 text-primary">
               {t(`statusDescriptions.${result.status}`)}
             </div>
-            {result.events.length > 0 ? (
+            {result.access === "status" ? (
+              <div className="mt-7 border-t border-border pt-6">
+                <h3 className="text-sm font-semibold text-foreground">{t("statusOnlyTitle")}</h3>
+                <p className="mt-2 max-w-xl text-xs leading-6 text-muted-foreground">
+                  {t("statusOnlyDescription")}
+                </p>
+                <button
+                  type="button"
+                  className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-primary"
+                  onClick={() => {
+                    setCode("");
+                    setValidation(false);
+                    inputRef.current?.focus();
+                    inputRef.current?.scrollIntoView({ block: "center" });
+                  }}
+                >
+                  {t("openConversation")}
+                  <ArrowRight className="size-3.5" />
+                </button>
+              </div>
+            ) : result.events.length > 0 ? (
               <div className="mt-7 border-t border-border pt-6">
                 <h3 className="mb-4 text-xs font-semibold text-foreground">{t("history")}</h3>
                 <ol className="space-y-3">
@@ -231,6 +259,20 @@ export function Tracking() {
               </div>
             ) : (
               <p className="mt-5 text-xs leading-6 text-muted-foreground">{t("noUpdates")}</p>
+            )}
+            {result.access !== "status" && (
+              <TrackingConversation
+                key={activeCode}
+                result={result}
+                code={activeCode}
+                onUpdate={(next) =>
+                  setResult((current) =>
+                    current?.access !== "status" && current?.reference === next.reference
+                      ? next
+                      : current,
+                  )
+                }
+              />
             )}
             <p className="mt-7 flex items-start gap-2 border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
               <LockKeyhole className="mt-1 size-3.5 shrink-0" />
