@@ -53,8 +53,8 @@ export function CampusModel({ orbit }: { orbit: string }) {
         if (cancelled || !host) return;
         viewer = document.createElement("model-viewer");
         viewerRef.current = viewer;
-        viewer.src = "/models/campus/building-e.glb";
-        viewer.poster = "/models/campus/building-e-poster.webp";
+        viewer.src = "/models/campus/atyrau-main-building.glb";
+        viewer.poster = "/models/campus/atyrau-main-building-poster.webp";
         viewer.alt = accessibilityRef.current.alt;
         viewer.a11y = accessibilityRef.current.a11y;
         viewer.cameraControls = true;
@@ -64,6 +64,7 @@ export function CampusModel({ orbit }: { orbit: string }) {
         viewer.touchAction = "pan-y";
         viewer.interactionPrompt = "none";
         viewer.cameraOrbit = orbitRef.current;
+        viewer.cameraTarget = "0m 1.5m 2m";
         viewer.minCameraOrbit = "auto 35deg auto";
         viewer.maxCameraOrbit = "auto 85deg auto";
         viewer.fieldOfView = "30deg";
@@ -80,6 +81,7 @@ export function CampusModel({ orbit }: { orbit: string }) {
         viewer.style.cssText = "display:block;width:100%;height:100%;--poster-color:transparent;";
         viewer.addEventListener("load", () => {
           window.clearTimeout(timeout);
+          viewer?.jumpCameraToGoal();
           if (!cancelled) setStatus("ready");
         });
         viewer.addEventListener("error", () => {
@@ -112,7 +114,10 @@ export function CampusModel({ orbit }: { orbit: string }) {
 
   return (
     <div className="relative isolate">
-      <div className="relative h-[260px] sm:h-[310px]" aria-busy={status === "loading"}>
+      <div
+        className="relative mx-auto aspect-[53/31] w-full max-w-[530px]"
+        aria-busy={status === "loading"}
+      >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-[12%] bottom-7 h-[95px] rounded-[50%] border border-[#b9c9ab]/60"
@@ -122,7 +127,7 @@ export function CampusModel({ orbit }: { orbit: string }) {
           className="pointer-events-none absolute inset-x-[4%] bottom-1 h-[140px] rounded-[50%] border border-[#cbd6bd]/70"
         />
         <Image
-          src="/models/campus/building-e-poster.webp"
+          src="/models/campus/atyrau-main-building-poster.webp"
           alt={status === "ready" ? "" : alt}
           fill
           priority

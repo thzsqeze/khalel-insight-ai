@@ -10,9 +10,9 @@ import { CampusModel } from "./campus-model";
 const topics = ["education", "infrastructure", "communication"] as const;
 type CampusTopic = (typeof topics)[number];
 const orbits: Record<CampusTopic, string> = {
-  education: "145deg 65deg 105%",
-  infrastructure: "215deg 65deg 105%",
-  communication: "75deg 65deg 105%",
+  education: "30deg 70deg 65%",
+  infrastructure: "-30deg 70deg 65%",
+  communication: "5deg 72deg 65%",
 };
 
 export function CampusExplorer() {
@@ -74,7 +74,7 @@ export function CampusExplorer() {
         </div>
       </div>
       <a
-        href="https://kenney.nl/assets/city-kit-commercial"
+        href="https://www.youtube.com/watch?v=NC3wUvOPpuA"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 inline-flex min-h-6 items-center text-[10px] text-[#65745b] underline decoration-[#b9c6ab] underline-offset-4 hover:text-primary"
