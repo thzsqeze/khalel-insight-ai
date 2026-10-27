@@ -1,5 +1,7 @@
 import teamRu from "@/messages/team-ru.json";
 import teamKk from "@/messages/team-kk.json";
+import ticketsRu from "@/messages/tickets-ru.json";
+import ticketsKk from "@/messages/tickets-kk.json";
 import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
 import publicRu from "@/messages/public-ru.json";
@@ -12,8 +14,8 @@ export default getRequestConfig(async () => {
   const locale = cookieStore.get("locale")?.value === "kk" ? "kk" : "ru";
   const messages =
     locale === "kk"
-      ? { ...publicKk, ...adminKk, ...teamKk }
-      : { ...publicRu, ...adminRu, ...teamRu };
+      ? { ...publicKk, ...adminKk, ...teamKk, ...ticketsKk }
+      : { ...publicRu, ...adminRu, ...teamRu, ...ticketsRu };
   return {
     locale,
     timeZone: "Asia/Atyrau",

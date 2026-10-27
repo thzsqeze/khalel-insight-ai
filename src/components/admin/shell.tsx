@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ExternalLink,
+  UsersRound,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { CookieSettingsButton } from "@/components/cookie-consent";
@@ -30,6 +31,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const t = useTranslations("admin");
+  const tickets = useTranslations("tickets");
   const org = useTranslations("organization");
   const locale = useLocale();
   const router = useRouter();
@@ -39,11 +41,17 @@ export function AdminShell({
   const [error, setError] = useState(false);
   const navigation = [
     { href: "/admin", label: t("overview"), icon: LayoutDashboard },
-    { href: "/admin/issues", label: t("issues"), icon: MessagesSquare },
+    { href: "/admin/issues", label: tickets("title"), icon: MessagesSquare },
     { href: "/admin/analytics", label: t("analytics"), icon: ChartNoAxesCombined },
+    ...(session.role === "owner"
+      ? [{ href: "/admin/team", label: tickets("team"), icon: UsersRound }]
+      : []),
   ];
   const current = navigation.find((item) =>
-    item.href === "/admin" ? pathname === item.href : pathname.startsWith(item.href),
+    item.href === "/admin"
+      ? pathname === item.href
+      : pathname.startsWith(item.href) ||
+        (item.href === "/admin/issues" && pathname.startsWith("/admin/tickets")),
   );
   async function changeLanguage(next: string) {
     setPending(true);
@@ -70,7 +78,7 @@ export function AdminShell({
     }
   }
   return (
-    <div className="min-h-screen bg-[#f6f5f1] text-[#242722]">
+    <div className="min-h-screen bg-[#f7f9f7] text-[#293a2e]">
       <a
         href="#admin-main"
         className="sr-only z-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-md focus:bg-white focus:p-4"
@@ -86,13 +94,13 @@ export function AdminShell({
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[232px] flex-col border-r border-[#dedfd7] bg-[#fffefa] transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[232px] flex-col border-r border-[#e1e7e2] bg-white transition-transform lg:translate-x-0",
           menuOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-[82px] shrink-0 items-center justify-between bg-[#294b3c] px-6">
+        <div className="flex h-[82px] shrink-0 items-center justify-between px-4 lg:px-6">
           <Link href="/" aria-label="UniVoice">
-            <Brand inverse />
+            <Brand />
           </Link>
           <Button
             variant="ghost"
@@ -104,9 +112,9 @@ export function AdminShell({
             <X />
           </Button>
         </div>
-        <div className="mx-5 mb-7 flex items-start gap-3 border-y border-[#dedfd7] py-4">
+        <div className="mx-4 mb-6 flex items-start gap-2.5 rounded-lg border border-[#e7ece7] bg-[#f9fbf9] px-3 py-3">
           <div
-            className="flex size-8 shrink-0 items-center justify-center rounded-md border border-[#d5d8cd] bg-[#e7e9e0] text-[10px] font-semibold text-[#515b4a]"
+            className="flex size-8 shrink-0 items-center justify-center rounded-md border border-[#dee8df] bg-[#edf4ee] text-[10px] font-semibold text-primary"
             aria-hidden="true"
           >
             {String(org.raw("initials"))}
@@ -134,10 +142,10 @@ export function AdminShell({
                 onClick={() => setMenuOpen(false)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-3 text-[12px] transition-colors",
                   active
-                    ? "bg-[#315747] font-medium text-white"
-                    : "text-[#74786e] hover:bg-[#e8eae2] hover:text-[#242722]",
+                    ? "bg-[#eaf2ec] font-semibold text-[#315747]"
+                    : "text-[#849087] hover:bg-[#f3f7f3] hover:text-[#315747]",
                 )}
               >
                 <item.icon className="size-[17px] shrink-0" strokeWidth={1.6} />
@@ -182,7 +190,9 @@ export function AdminShell({
               {session.email}
             </p>
             <p className="mt-1 text-[10px] text-[#74786e]">
-              {t(session.role === "admin" ? "administrator" : "moderator")}
+              {session.role === "owner"
+                ? tickets("owner")
+                : t(session.role === "admin" ? "administrator" : "moderator")}
             </p>
           </div>
           <button
@@ -196,7 +206,7 @@ export function AdminShell({
         </div>
       </aside>
       <div className="min-w-0 lg:pl-[232px]">
-        <header className="flex h-[64px] items-center justify-between gap-4 border-b border-[#dedfd7] bg-[#f6f5f1] px-5 sm:px-8">
+        <header className="flex h-[64px] items-center justify-between gap-4 border-b border-[#e1e7e2] bg-white px-5 sm:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               id="admin-menu-toggle"

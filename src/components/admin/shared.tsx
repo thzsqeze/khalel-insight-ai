@@ -23,10 +23,10 @@ import { cn, formatDate } from "@/lib/utils";
 import type { Filters } from "@/lib/analytics";
 
 const statusClasses: Record<Status, string> = {
-  new: "border-[#dfe2d9] bg-[#f4f5ef] text-[#656e5a]",
-  under_review: "border-[#e8ddc4] bg-[#f7f2e6] text-[#8a7038]",
-  in_progress: "border-[#d8e2d7] bg-[#edf2e8] text-[#537145]",
-  resolved: "border-[#cfded4] bg-[#e8f0e9] text-[#315747]",
+  new: "border-[#d1ecf2] bg-[#e2f2f5] text-[#268099]",
+  under_review: "border-[#f5e6c8] bg-[#fbf1df] text-[#a77120]",
+  in_progress: "border-[#e5ddf7] bg-[#eee8fa] text-[#7c5bad]",
+  resolved: "border-[#d7e8d5] bg-[#e1efdd] text-[#4b8c41]",
 };
 const statusIcons = {
   new: Circle,
@@ -40,7 +40,7 @@ export function StatusBadge({ status }: { status: Status }) {
   return (
     <Badge
       className={cn(
-        "whitespace-nowrap rounded-md py-1 text-[10px] font-medium",
+        "whitespace-nowrap rounded-full py-1 text-[10px] font-medium",
         statusClasses[status],
       )}
     >
