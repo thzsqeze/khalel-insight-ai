@@ -70,7 +70,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="relative z-30 border-b border-border bg-background">
-        <div className="mx-auto flex h-[88px] max-w-[1320px] items-center justify-between gap-5 px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-[88px] max-w-[1320px] items-center justify-between gap-5 px-5 max-[359px]:gap-2 max-[359px]:px-3 sm:px-8 lg:px-12">
           <Link href="/" aria-label={`UniVoice — ${t("home")}`} onClick={() => setOpen(false)}>
             <PublicLogo />
           </Link>

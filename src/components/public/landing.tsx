@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { categories } from "@/lib/types";
 import { publicButtonClass } from "./public-shared";
+import { CampusExplorer } from "./campus-explorer";
 
 const categoryIcons = {
   timetable: Clock3,
@@ -37,59 +38,57 @@ function CategoryChooser() {
   return (
     <section
       aria-labelledby="choose-topic-title"
-      className="relative rounded-2xl bg-[#293f33] p-6 text-white shadow-[0_20px_60px_-32px_#293f3360] sm:p-8"
+      className="relative grid gap-8 rounded-[24px] bg-[#293f33] p-6 text-white sm:p-8 lg:grid-cols-[.85fr_1.4fr] lg:gap-16 lg:p-10"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div>
         <p className="max-w-[230px] text-xs font-medium leading-5 tracking-[1px] text-[#ccd9a9]">
           {t("chooserEyebrow")}
         </p>
-        <span
-          aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-[#dfebb6] text-[#293f33]"
+        <h2
+          id="choose-topic-title"
+          className="mt-5 whitespace-pre-line text-[31px] font-medium leading-[1.13] tracking-[-1px] sm:text-[35px]"
         >
-          <ArrowUpRight className="size-5" />
-        </span>
+          {t("chooserTitle")}
+        </h2>
+        <p className="mt-4 max-w-sm text-[13px] leading-6 text-[#c4cebf]">
+          {t("chooserDescription")}
+        </p>
+        <p className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#b4c2ac]">
+          <LockKeyhole className="mt-0.5 size-3.5 shrink-0" />
+          {t("chooserPrivacy")}
+        </p>
       </div>
-      <h2
-        id="choose-topic-title"
-        className="mt-5 whitespace-pre-line text-[31px] font-medium leading-[1.13] tracking-[-1px] sm:text-[35px]"
-      >
-        {t("chooserTitle")}
-      </h2>
-      <p className="mt-4 max-w-sm text-[13px] leading-6 text-[#c4cebf]">
-        {t("chooserDescription")}
-      </p>
-      <div className="mt-7 grid grid-cols-2 gap-2.5">
-        {categories
-          .filter((category) => category !== "other")
-          .map((category) => {
-            const Icon = categoryIcons[category];
-            return (
-              <Link
-                key={category}
-                href={`/submit?category=${category}`}
-                className="group flex min-h-[92px] flex-col items-start justify-between gap-3 rounded-xl border border-white/15 bg-white/6 px-3.5 py-3.5 transition hover:border-[#dfebb6] hover:bg-[#dfebb6] hover:text-[#293f33] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfebb6]"
-              >
-                <Icon
-                  className="size-5 text-[#dfebb6] group-hover:text-[#293f33]"
-                  strokeWidth={1.5}
-                />
-                <span className="text-xs font-medium leading-5">{c(`categories.${category}`)}</span>
-              </Link>
-            );
-          })}
+      <div>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          {categories
+            .filter((category) => category !== "other")
+            .map((category) => {
+              const Icon = categoryIcons[category];
+              return (
+                <Link
+                  key={category}
+                  href={`/submit?category=${category}`}
+                  className="group flex min-h-[92px] flex-col items-start justify-between gap-3 rounded-xl border border-white/15 bg-white/6 px-3.5 py-3.5 transition hover:border-[#dfebb6] hover:bg-[#dfebb6] hover:text-[#293f33] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dfebb6]"
+                >
+                  <Icon
+                    className="size-5 text-[#dfebb6] group-hover:text-[#293f33]"
+                    strokeWidth={1.5}
+                  />
+                  <span className="text-xs font-medium leading-5">
+                    {c(`categories.${category}`)}
+                  </span>
+                </Link>
+              );
+            })}
+        </div>
+        <Link
+          href="/submit?category=other"
+          className="mt-3 flex min-h-12 items-center justify-between rounded-xl border border-white/15 px-4 text-xs font-medium transition hover:bg-white/10"
+        >
+          {t("chooserOther")}
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
-      <Link
-        href="/submit?category=other"
-        className="mt-3 flex min-h-12 items-center justify-between rounded-xl border border-white/15 px-4 text-xs font-medium transition hover:bg-white/10"
-      >
-        {t("chooserOther")}
-        <ArrowRight className="size-4" />
-      </Link>
-      <p className="mt-5 flex items-start gap-2 text-xs leading-5 text-[#b4c2ac]">
-        <LockKeyhole className="mt-0.5 size-3.5 shrink-0" />
-        {t("chooserPrivacy")}
-      </p>
     </section>
   );
 }
@@ -132,7 +131,7 @@ export function Landing() {
               {t("anonymous")}
             </p>
           </div>
-          <CategoryChooser />
+          <CampusExplorer />
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-3 lg:mt-14">
           {[
@@ -177,6 +176,9 @@ export function Landing() {
           ))}
         </div>
       </section>
+      <div className="mx-auto max-w-[1320px] px-5 pb-12 sm:px-8 lg:px-12 lg:pb-16">
+        <CategoryChooser />
+      </div>
       <section id="how-it-works" className="scroll-mt-8 bg-[#eeeee6]">
         <div className="mx-auto max-w-[1320px] px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
           <p className="text-xs font-medium tracking-[1px] text-muted-foreground">
