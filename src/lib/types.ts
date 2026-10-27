@@ -32,7 +32,7 @@ export interface Analysis {
   sensitiveData: boolean;
   confidence: number;
   reviewNeeded: boolean;
-  source: "openai";
+  source: "groq" | "cloudflare" | "openai";
   reviewed: boolean;
 }
 export interface Submission {

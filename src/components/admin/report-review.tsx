@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { FileSearch, CheckCheck, ShieldAlert, ArrowRight, RefreshCw, Plus, X } from "lucide-react";
@@ -18,10 +18,12 @@ export function ReportReview({
   report,
   onUpdate,
   allowCreate = false,
+  onDirtyChange,
 }: {
   report: Submission;
   onUpdate: () => void;
   allowCreate?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useTranslations("admin");
   const c = useTranslations("categories");
@@ -37,6 +39,15 @@ export function ReportReview({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const changed =
+    category !== (report.analysis?.category ?? report.category) ||
+    urgency !== (report.analysis?.urgency ?? "medium") ||
+    summary !== (report.analysis?.summary ?? "") ||
+    title !== (report.analysis?.summary.slice(0, 180) ?? "");
+  useEffect(() => {
+    onDirtyChange?.(changed);
+    return () => onDirtyChange?.(false);
+  }, [changed, onDirtyChange]);
   async function mutate(path: string, body?: unknown) {
     setBusy(true);
     setError(null);
@@ -103,8 +114,18 @@ export function ReportReview({
               <CheckCheck className="size-3" />
               {t("reviewed")}
             </Badge>
-          ) : (
+          ) : report.analysis ? (
             <Badge className="bg-amber-50 text-amber-700">{t("awaitingReview")}</Badge>
+          ) : (
+            <Badge variant="outline">
+              {t(
+                report.analysisStatus === "failed"
+                  ? "analysisFailedLabel"
+                  : report.analysisStatus === "skipped"
+                    ? "analysisSkippedLabel"
+                    : "analysisPendingLabel",
+              )}
+            </Badge>
           )}
         </div>
         {report.analysis ? (
@@ -215,7 +236,13 @@ export function ReportReview({
                 onClick={() => mutate(`/api/admin/submissions/${report.id}/analysis`)}
               >
                 <RefreshCw className={busy ? "animate-spin" : ""} />
-                {t(report.analysisStatus === "failed" ? "rerunAnalysis" : "runAnalysis")}
+                {t(
+                  busy
+                    ? "analyzing"
+                    : report.analysisStatus === "failed"
+                      ? "rerunAnalysis"
+                      : "runAnalysis",
+                )}
               </Button>
             )}
           </div>

@@ -15,9 +15,16 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const repo = getRepository();
     const sub = await repo.getSubmission(id);
     if (!sub) throw new ApiError("not_found", 404);
-    if (!sub.aiConsent) throw new ApiError("forbidden", 403);
+    if (!sub.aiConsent) throw new ApiError("consent_required", 403);
     const result = await analyzeSubmission(sub);
     await repo.saveAnalysis(id, result.analysis, result.status, result.embedding);
-    return { ok: true };
+    if (result.status !== "completed") {
+      const reason = result.reason ?? "provider";
+      throw new ApiError(
+        `analysis_${reason}`,
+        reason === "rate_limit" ? 429 : reason === "privacy" ? 422 : 503,
+      );
+    }
+    return { ok: true, analysisStatus: result.status };
   });
 }
