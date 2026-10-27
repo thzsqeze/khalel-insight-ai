@@ -4,6 +4,7 @@ const fixture = vi.hoisted(() => ({
   user: null as null | { id: string; email: string; user_metadata: { role: string } },
   userError: null as null | { message: string },
   role: "viewer",
+  isOwner: false,
   profileError: null as null | { message: string },
   selectedId: "",
   signedOut: false,
@@ -32,14 +33,17 @@ vi.mock("@/lib/server/supabase", () => ({
       if (table !== "profiles") throw new Error("Unexpected table");
       return {
         select: (columns: string) => {
-          if (columns !== "role") throw new Error("Unexpected projection");
+          if (columns !== "role,is_owner") throw new Error("Unexpected projection");
           return {
             eq: (column: string, id: string) => {
               if (column !== "id") throw new Error("Unexpected filter");
               fixture.selectedId = id;
               return {
                 single: async () => ({
-                  data: fixture.user && id === fixture.user.id ? { role: fixture.role } : null,
+                  data:
+                    fixture.user && id === fixture.user.id
+                      ? { role: fixture.role, is_owner: fixture.isOwner }
+                      : null,
                   error: fixture.profileError,
                 }),
               };
@@ -53,7 +57,7 @@ vi.mock("@/lib/server/supabase", () => ({
     throw new Error("No service call allowed in authorization tests");
   },
 }));
-import { getAdminSession, login } from "@/lib/server/auth";
+import { getAdminSession, requireOwner, login } from "@/lib/server/auth";
 import { GET as overview } from "@/app/api/admin/overview/route";
 import { POST as createIssue } from "@/app/api/admin/issues/route";
 import { GET as detail, PATCH as patchIssue } from "@/app/api/admin/issues/[id]/route";
@@ -65,6 +69,7 @@ beforeEach(() => {
   fixture.user = null;
   fixture.userError = null;
   fixture.role = "viewer";
+  fixture.isOwner = false;
   fixture.profileError = null;
   fixture.selectedId = "";
   fixture.signedOut = false;
@@ -90,11 +95,12 @@ describe("real server authorization", () => {
     );
     expect(await getAdminSession()).toBeNull();
   });
-  it.each(["admin", "moderator"])(
+  it.each(["owner", "admin", "moderator"])(
     "accepts a verified Supabase user with server-granted %s role",
     async (role) => {
       fixture.user = user;
-      fixture.role = role;
+      fixture.role = role === "owner" ? "admin" : role;
+      fixture.isOwner = role === "owner";
       vi.stubEnv("DEMO_MODE", "true");
       expect(await getAdminSession()).toEqual({ id: user.id, email: user.email, role });
       expect(fixture.selectedId).toBe(user.id);
@@ -102,6 +108,23 @@ describe("real server authorization", () => {
   );
   it("does not trust admin metadata without the database role", async () => {
     fixture.user = user;
+    expect(await getAdminSession()).toBeNull();
+  });
+  it.each(["admin", "moderator", "viewer"])("rejects %s from owner operations", async (role) => {
+    fixture.user = { ...user, user_metadata: { role: "owner" } };
+    fixture.role = role;
+    await expect(requireOwner()).rejects.toThrow(role === "viewer" ? "unauthorized" : "forbidden");
+  });
+  it("rechecks owner grants and staff revocation on the next request", async () => {
+    fixture.user = user;
+    fixture.role = "admin";
+    fixture.isOwner = true;
+    expect((await requireOwner()).role).toBe("owner");
+    fixture.role = "admin";
+    fixture.isOwner = false;
+    await expect(requireOwner()).rejects.toThrow("forbidden");
+    fixture.role = "viewer";
+    fixture.isOwner = false;
     expect(await getAdminSession()).toBeNull();
   });
   it("fails closed for failed identity validation and failed profile lookup", async () => {

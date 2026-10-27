@@ -1,3 +1,5 @@
+import teamRu from "@/messages/team-ru.json";
+import teamKk from "@/messages/team-kk.json";
 import { describe, expect, it } from "vitest";
 import publicRu from "@/messages/public-ru.json";
 import publicKk from "@/messages/public-kk.json";
@@ -16,6 +18,7 @@ describe("complete Russian and Kazakh catalogs", () => {
   for (const [scope, ru, kk] of [
     ["public", publicRu, publicKk],
     ["admin", adminRu, adminKk],
+    ["team", teamRu, teamKk],
   ] as const) {
     it(`${scope} provides all translated keys and preserves interpolation parameters`, () => {
       const russian = flatten(ru),

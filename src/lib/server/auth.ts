@@ -13,11 +13,18 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     if (error || !user) return null;
     const { data: profile, error: profileError } = await client
       .from("profiles")
-      .select("role")
+      .select("role,is_owner")
       .eq("id", user.id)
       .single();
     if (profileError || !profile || !["admin", "moderator"].includes(profile.role)) return null;
-    return { id: user.id, email: user.email ?? "", role: profile.role as AdminSession["role"] };
+    return {
+      id: user.id,
+      email: user.email ?? "",
+      role:
+        profile.role === "admin" && profile.is_owner === true
+          ? "owner"
+          : (profile.role as AdminSession["role"]),
+    };
   } catch {
     return null;
   }
@@ -27,6 +34,11 @@ export async function requireAdmin() {
   if (!session) throw new ApiError("unauthorized", 401);
   return session;
 }
+export async function requireOwner() {
+  const session = await requireAdmin();
+  if (session.role !== "owner") throw new ApiError("forbidden", 403);
+  return session;
+}
 export async function login(input: unknown) {
   const credentials = loginSchema.parse(input);
   const client = await sessionClient();
@@ -34,7 +46,7 @@ export async function login(input: unknown) {
   if (error || !data.user) throw new ApiError("unauthorized", 401);
   const { data: profile, error: profileError } = await client
     .from("profiles")
-    .select("role")
+    .select("role,is_owner")
     .eq("id", data.user.id)
     .single();
   if (profileError || !profile || !["admin", "moderator"].includes(profile.role)) {

@@ -108,5 +108,5 @@ export interface TrackingResult {
 export interface AdminSession {
   id: string;
   email: string;
-  role: "admin" | "moderator";
+  role: "owner" | "admin" | "moderator";
 }
