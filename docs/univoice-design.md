@@ -8,7 +8,9 @@ The user selected **UniVoice** as the institution-independent product name. Univ
 - [Monolytics — Artem and Oleksandra Pravda, Behance](https://www.behance.net/gallery/198265921/Monolytics-User-Analytics-App-SaaS-UX-UI-Design): reviewed the case study's editorial composition, large typography and dark green/neutral presentation. Adapt the clear hierarchy to a university service; avoid decorative mockup effects in the application.
 - [Feedback Management Dashboard — Antor Paul, Dribbble](https://dribbble.com/shots/23707231-Feedback-Management-Dashboard): additional feedback-management reference found during research.
 
-No third-party images, logos or interface assets are included in the product.
+The marketing page uses Kenney's ready-made **City Kit Commercial 2.1** building under **CC0**. The original model, texture and license are self-hosted in `public/models/campus/`; the poster is rendered from the same supplied model. No original model or AI-generated image was created. [Asset source](https://kenney.nl/assets/city-kit-commercial).
+
+The campus card loads its 3D renderer only after an explicit click. Visitors can rotate the building, reset the view and select a topic that links to the feedback form. A static poster remains available when 3D cannot load; reduced-motion preferences, keyboard controls and RU/KK labels are supported. The illustration does not depict a specific university. All original category links remain available below the hero.
 
 ## Design decisions
 

@@ -16,7 +16,7 @@ pnpm install
 pnpm dev
 ```
 
-Open **http://localhost:3000** (or set `APP_ORIGIN=http://127.0.0.1:3000` when using that hostname). Public pages render without credentials; persistence and login require a configured Supabase project and return an error when unavailable. A failed database connection is never replaced with fictional records or a success receipt.
+Open **http://localhost:3000**. In development, `localhost`, `127.0.0.1` and `[::1]` may be used interchangeably when `APP_ORIGIN` is a loopback URL with the same protocol and port; the browser's Origin must still match the actual Host. Production continues to require the exact configured origin. Public pages render without credentials; persistence and login require a configured Supabase project and return an error when unavailable. A failed database connection is never replaced with fictional records or a success receipt.
 
 ## Implemented
 
@@ -26,11 +26,11 @@ Open **http://localhost:3000** (or set `APP_ORIGIN=http://127.0.0.1:3000` when u
 - Russian/Kazakh localization with next-intl and persistent language choice; bundled Inter, Tailwind, Lucide, Motion and Recharts.
 - Supabase Auth with verified server-side roles, session refresh, PostgreSQL RLS, audit history, atomic mutations and pgvector similarity.
 - Zod validation, honeypot, body limits, durable rate limits, same-origin checks, hashed 192-bit tracking tokens and server-only secrets.
-- Separate optional AI consent, OpenAI classification/embeddings, local redaction, output validation and administrator retry. Provider failures retain the report without inventing analysis.
+- Separate optional AI consent, Groq/Cloudflare classification, local redaction, output validation and administrator retry. OpenAI with embeddings remains an explicit optional choice. An explicitly configured Cloudflare reserve handles Groq quota errors. Provider failures retain the report without inventing analysis.
 - Russian/Kazakh cookie settings, necessary-only or optional error diagnostics, 180-day preference, cross-tab updates and consent withdrawal without changing login or language cookies.
 - Sentry browser, React and server/API error reporting with request-specific consent and a strict payload allowlist. Session replay, behavior analytics, tracing, logs and metrics are disabled.
 
-Students and teachers submit without accounts. The private receipt code is needed to track status. Public progress includes only human-reviewed summaries of groups with at least three reports, never raw complaint text.
+Students and teachers submit without accounts. The public ticket reference shows only status; the private receipt code opens staff replies and visitor follow-ups. Public progress includes only human-reviewed summaries of groups with at least three reports, never raw complaint text.
 
 ## Configure a university
 
@@ -47,7 +47,22 @@ The active language selects its matching name, falling back to `ORGANIZATION_NAM
 
 This MVP supports **one university per deployment and database**. Use separate Supabase projects for separate institutions. Shared-database tenant isolation and institution switching are not implemented. The existing GitHub repository URL is retained; the product and package name are UniVoice.
 
-Design references and decisions: [docs/univoice-design.md](docs/univoice-design.md).
+Design references and decisions: [docs/univoice-design.md](docs/univoice-design.md). Connected design tools and the next focused pass: [docs/design-tools.md](docs/design-tools.md).
+
+## AI analysis
+
+Select one provider in `.env.local` or the hosting environment. Keys stay on the server:
+
+| Provider | Configuration | Default model |
+| --- | --- | --- |
+| Groq (default) | `AI_PROVIDER=groq`, `GROQ_API_KEY` | `openai/gpt-oss-120b` |
+| Cloudflare Workers AI | `AI_PROVIDER=cloudflare`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | `@cf/qwen/qwen3-30b-a3b-fp8` |
+| OpenAI (optional paid API) | `AI_PROVIDER=openai`, `OPENAI_API_KEY` | `gpt-4.1-mini` |
+| Disabled | `AI_PROVIDER=disabled` | No external requests |
+
+Create a [Groq key](https://console.groq.com/keys) on its Free plan, or use the [Workers AI free allocation](https://developers.cloudflare.com/workers-ai/platform/pricing/). Free quotas are limited and may change; a paid provider account can incur charges under its own plan. UniVoice does not upgrade plans. Set `AI_FALLBACK_PROVIDER=cloudflare` with both Cloudflare credentials to allow one reserve attempt after Groq HTTP 429. Privacy, authentication, network and malformed-response failures never switch providers. Leave the variable empty to disable the reserve. After changing configuration, restart the server or redeploy.
+
+With separate report consent, AI suggests a category, a summary and keywords in the report's language (Russian or Kazakh), urgency, and a confidence estimate. An administrator reviews every suggestion. Missing credentials, exhausted quotas, unsafe text or invalid responses leave the report available for manual review and retry. Groq/Cloudflare do not request embeddings; semantic similarity for newly analyzed reports requires explicitly selecting the existing OpenAI integration. Details: [provider setup and privacy](docs/backend.md#ai-providers).
 
 ## Cookies and Sentry
 
@@ -82,7 +97,7 @@ The production build uses the supported Webpack compiler because some desktop sa
 
 Public URL: **https://khalel-insight-ai.vercel.app/**. The existing Vercel project is `kai-6ade/khalel-insight-ai`, connected to the `main` branch of `thzsqeze/khalel-insight-ai`. The repository and hosting identifiers retain their original names; the product is UniVoice.
 
-Set the variables from `.env.example` in your hosting environment. Use the exact HTTPS `APP_ORIGIN`, keep `SUPABASE_SECRET_KEY` server-only and configure `TRUSTED_IP_HEADER` only when your ingress overwrites it. Legacy Supabase anon/service-role keys remain supported. OpenAI is optional. Deploy on the Node runtime (Node 24 recommended) with `pnpm build`.
+Set the variables from `.env.example` in your hosting environment. Use the exact HTTPS `APP_ORIGIN`, keep `SUPABASE_SECRET_KEY` server-only and configure `TRUSTED_IP_HEADER` only when your ingress overwrites it. Legacy Supabase anon/service-role keys remain supported. AI is optional; set the selected provider's server variables separately on the host. Deploy on the Node runtime (Node 24 recommended) with `pnpm build`.
 
 Production uses `APP_ORIGIN=https://khalel-insight-ai.vercel.app`, `TRUSTED_IP_HEADER=x-vercel-forwarded-for` and the prepared Supabase project `wgagyfqxsmsjtajdtmpb`, as selected by the owner. Set all three dedicated server variables: `UNIVOICE_SUPABASE_URL`, `UNIVOICE_SUPABASE_PUBLISHABLE_KEY` and `UNIVOICE_SUPABASE_SECRET_KEY`. These take priority over provider-managed aliases and are never mixed with legacy credentials. URL and publishable keys are Vercel Config variables; service keys and the rate-limit salt are Secrets. The legacy `NEXT_PUBLIC_SUPABASE_*` configuration remains supported when none of the dedicated variables is set; Next.js includes those public values during the build, so rebuild after changing them.
 
@@ -90,7 +105,11 @@ Full setup, roles, privacy boundaries and operations: [docs/backend.md](docs/bac
 
 ## Current integration status and limitations
 
-The hosted **UniVoice** project (`wgagyfqxsmsjtajdtmpb`, Frankfurt / `eu-central-1`) is provisioned. Both migrations are applied and their local version numbers match the remote history. The first administrator is created; local credentials and keys are stored only in ignored files. Supabase RLS assertions, real login, feedback persistence, private tracking, issue creation and status changes were verified on 23 October 2026. The temporary verification report and its issue/history were removed. No sample data was migrated from the former local demo. Public hosting is on Vercel; OpenAI remains unconfigured.
+The hosted **UniVoice** project (`wgagyfqxsmsjtajdtmpb`, Frankfurt / `eu-central-1`) is provisioned. Both migrations are applied and their local version numbers match the remote history. The first administrator is created; local credentials and keys are stored only in ignored files. Supabase RLS assertions, real login, feedback persistence, private tracking, issue creation and status changes were verified on 23 October 2026. The temporary verification report and its issue/history were removed. No sample data was migrated from the former local demo. Public hosting is on Vercel.
+
+On 27 October 2026, the local Groq integration completed real API calls for synthetic Russian and Kazakh reports through the application's analysis function, including output privacy validation. These checks did not create database records. Cloudflare was subsequently verified with real synthetic RU/KK requests, and quota-only fallback is covered by HTTP contract tests. OpenAI remains unconfigured. The new AI configuration has not been deployed to Vercel by this change.
+
+A subsequent full browser check on the same date reproduced and fixed the local `localhost` / `127.0.0.1` origin mismatch. A temporary consented report was submitted from the public form (201), tracked (200), analyzed by Groq, saved to Supabase, and viewed after real administrator login with its rendered summary matching the saved analysis. The test report was then deleted. Input preparation was subsequently improved to remove uncertain capitalized words while retaining useful feedback, instead of rejecting a whole ordinary sentence. Explicit identifying context and insufficient remaining text still block analysis; generated output and public titles retain stricter checks.
 
 Attachments, email notifications, a retention scheduler, automatic retry queue, deletion UI and MFA management UI are not included. Interrupted AI processing can be retried manually. Pattern-based personal-data detection is conservative and incomplete; public summaries need human review. Authorized moderators can read raw reports. The institution must set its privacy, retention and access rules before collecting feedback.
 
@@ -106,3 +125,13 @@ The administrator snapshot fetches stored records with paging and computes analy
 - `src/messages/`, `src/i18n/`: Russian and Kazakh messages.
 - `supabase/`: schema and RLS assertions.
 - `tests/`, `e2e/`: automated checks.
+
+The consented report `UV-EDBAC236B5` was retried successfully through the real staff UI on 27 October 2026 and retained in Supabase. Administrator retries now return actionable error codes instead of success when analysis fails. Groq remains primary, with an explicitly enabled Cloudflare reserve only after quota errors. Provider keys must be configured separately for each deployment and are never committed.
+
+### Ticket workspace
+
+The local cabinet now includes a ticket queue at `/admin/issues`, a conversation drawer at `/admin/issues?ticket=<id>`, a reference-based analytics screen at `/admin/analytics`, and owner-only team/departments management at `/admin/team`. Legacy `/admin/tickets/[id]` links redirect to the drawer. Opening a ticket keeps the queue and its filters in place. Replies reach anonymous authors on `/track` through their private receipt code; lookup by `UV-…` returns status only, and internal notes remain private. A visitor follow-up reopens a resolved ticket. Existing public issue groups remain available through the separate groups view.
+
+Apply the additive migrations in `supabase/migrations` for a new installation. Ownership is a protected database flag on an admin profile; provision the first verified owner through a trusted operator connection, then use the team screen. Invitations never auto-grant roles. See [backend details](docs/backend.md) for permission rules, legacy deployment compatibility, email setup and verification limits.
+
+Department email notices require Resend credentials and a verified sender (`RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_APP_ORIGIN`). Staff invitations/recovery use Supabase Auth email configuration. Neither is simulated as a successful send when configuration is absent. Configure the required server environment variables on Vercel before enabling AI fallback or email delivery in production.
