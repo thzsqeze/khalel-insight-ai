@@ -6,6 +6,8 @@ out/
 .env*
 !.env.example
 .data/
+.superpowers/
+supabase/.temp/
 test-results/
 playwright-report/
 coverage/

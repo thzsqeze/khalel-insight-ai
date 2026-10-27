@@ -18,21 +18,91 @@
   --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); font-size: 14px; -webkit-font-smoothing: antialiased; }
-button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
-button:not(:disabled), select { cursor: pointer; }
-button:disabled { cursor: not-allowed; }
-::selection { background: #dce8bd; color: #242722; }
-a:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 4px; }
-input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primary); }
-input, select, textarea { font: inherit; }
-html { scroll-behavior: smooth; }
-.admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-.admin-table th { padding: 13px 20px; color: #72776c; font-size: 11px; font-weight: 500; background: #f7f7f3; border-block: 1px solid var(--color-border); white-space: nowrap; }
-.admin-table td { padding: 17px 20px; border-bottom: 1px solid #e8e9e2; font-size: 12px; }
-.admin-table tr:last-child td { border-bottom: 0; }
-.admin-table tbody tr:hover { background: #f8f9f5; }
-.recharts-wrapper:focus, .recharts-surface:focus { outline: none; }
-.recharts-default-tooltip { border-radius: 5px !important; border-color: var(--color-border) !important; font-size: 12px; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled),
+select {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+::selection {
+  background: #dce8bd;
+  color: #242722;
+}
+a:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 4px;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-primary);
+}
+input,
+select,
+textarea {
+  font: inherit;
+}
+html {
+  scroll-behavior: smooth;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.admin-table th {
+  padding: 13px 20px;
+  color: #72776c;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f7f7f3;
+  border-block: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.admin-table td {
+  padding: 17px 20px;
+  border-bottom: 1px solid #e8e9e2;
+  font-size: 12px;
+}
+.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+.admin-table tbody tr:hover {
+  background: #f8f9f5;
+}
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+.recharts-default-tooltip {
+  border-radius: 5px !important;
+  border-color: var(--color-border) !important;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

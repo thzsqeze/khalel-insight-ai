@@ -9,5 +9,9 @@ export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   const locale = cookieStore.get("locale")?.value === "kk" ? "kk" : "ru";
   const messages = locale === "kk" ? { ...publicKk, ...adminKk } : { ...publicRu, ...adminRu };
-  return { locale, timeZone: "Asia/Atyrau", messages: { ...messages, organization: getOrganization(locale) } };
+  return {
+    locale,
+    timeZone: "Asia/Atyrau",
+    messages: { ...messages, organization: getOrganization(locale) },
+  };
 });

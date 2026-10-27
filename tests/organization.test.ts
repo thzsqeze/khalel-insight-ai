@@ -7,7 +7,10 @@ describe("institution deployment identity", () => {
     expect(getOrganization("kk", {}).name).toBe("Университет қауымдастығы");
   });
   it("selects the requested language and falls back to a shared name", () => {
-    const env = { ORGANIZATION_NAME: "Shared University", ORGANIZATION_NAME_KK: "  Жаңа университет  " };
+    const env = {
+      ORGANIZATION_NAME: "Shared University",
+      ORGANIZATION_NAME_KK: "  Жаңа университет  ",
+    };
     expect(getOrganization("kk", env)).toEqual({ name: "Жаңа университет", initials: "ЖУ" });
     expect(getOrganization("ru", env)).toEqual({ name: "Shared University", initials: "SU" });
   });
@@ -16,7 +19,8 @@ describe("institution deployment identity", () => {
     expect(getOrganization("ru", { ORGANIZATION_INITIALS: "ABCDE" }).initials).toBe("ABCD");
   });
   it("returns only public identity and preserves literal display text", () => {
-    expect(getOrganization("ru", { ORGANIZATION_NAME: "O'Neil {Campus}", SECRET: "private" }))
-      .toEqual({ name: "O'Neil {Campus}", initials: "O{" });
+    expect(
+      getOrganization("ru", { ORGANIZATION_NAME: "O'Neil {Campus}", SECRET: "private" }),
+    ).toEqual({ name: "O'Neil {Campus}", initials: "O{" });
   });
 });

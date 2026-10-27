@@ -1,2 +1,4 @@
 import { AnalyticsPage } from "@/components/admin/analytics-page";
-export default function Page() { return <AnalyticsPage />; }
+export default function Page() {
+  return <AnalyticsPage />;
+}

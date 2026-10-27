@@ -15,7 +15,8 @@ export function initializeServerDiagnostics() {
     beforeSendTransaction: () => null,
     sendClientReports: false,
     maxBreadcrumbs: 0,
-    beforeSend: event => filterDiagnosticEvent(event, event.tags?.univoice_diagnostics === "granted"),
+    beforeSend: (event) =>
+      filterDiagnosticEvent(event, event.tags?.univoice_diagnostics === "granted"),
     beforeSendLog: () => null,
     beforeSendMetric: () => null,
   });

@@ -15,7 +15,11 @@ export const onRequestError: Instrumentation.onRequestError = async (error, requ
   try {
     const Sentry = await import("@sentry/nextjs");
     // Do not forward Next's request/context objects; they can contain private data.
-    Sentry.captureException(error, { tags: { univoice_diagnostics: "granted", diagnostics_source: "server" } });
+    Sentry.captureException(error, {
+      tags: { univoice_diagnostics: "granted", diagnostics_source: "server" },
+    });
     await Sentry.flush(1500);
-  } catch { /* A monitoring outage must not affect the application. */ }
+  } catch {
+    /* A monitoring outage must not affect the application. */
+  }
 };

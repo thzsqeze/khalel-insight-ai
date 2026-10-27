@@ -8,7 +8,9 @@ export async function captureServerError(error: unknown) {
     const requestHeaders = await headers();
     if (!hasDiagnosticsConsent(requestHeaders.get("cookie") ?? "")) return;
     const Sentry = await import("@sentry/nextjs");
-    Sentry.captureException(error, { tags: { univoice_diagnostics: "granted", diagnostics_source: "api" } });
+    Sentry.captureException(error, {
+      tags: { univoice_diagnostics: "granted", diagnostics_source: "api" },
+    });
     await Sentry.flush(1500);
   } catch {
     // Monitoring must never change a request's result or expose a second failure.

@@ -19,8 +19,14 @@ describe("cookie consent", () => {
   });
 
   it("finds consent among unrelated session and locale cookies", () => {
-    expect(readCookieConsent("locale=kk; univoice_cookie_consent=v1.required; sb-project-auth-token=session=value")).toBe("required");
-    expect(readCookieConsent("locale=ru; univoice_cookie_consent=v1.diagnostics")).toBe("diagnostics");
+    expect(
+      readCookieConsent(
+        "locale=kk; univoice_cookie_consent=v1.required; sb-project-auth-token=session=value",
+      ),
+    ).toBe("required");
+    expect(readCookieConsent("locale=ru; univoice_cookie_consent=v1.diagnostics")).toBe(
+      "diagnostics",
+    );
   });
 
   it.each([
@@ -34,11 +40,16 @@ describe("cookie consent", () => {
     "univoice_cookie_consent=v1.diagnostics=extra",
     "univoice_cookie_consent=v1.required; univoice_cookie_consent=v1.diagnostics",
     "univoice_cookie_consent=v1.diagnostics; univoice_cookie_consent=v1.required",
-  ])("keeps diagnostics disabled for missing, rejected, malformed or ambiguous consent: %s", header => {
-    expect(hasDiagnosticsConsent(header)).toBe(false);
-  });
+  ])(
+    "keeps diagnostics disabled for missing, rejected, malformed or ambiguous consent: %s",
+    (header) => {
+      expect(hasDiagnosticsConsent(header)).toBe(false);
+    },
+  );
 
   it("enables diagnostics only for the exact consent cookie", () => {
-    expect(hasDiagnosticsConsent("locale=kk; univoice_cookie_consent=v1.diagnostics; session=abc")).toBe(true);
+    expect(
+      hasDiagnosticsConsent("locale=kk; univoice_cookie_consent=v1.diagnostics; session=abc"),
+    ).toBe(true);
   });
 });

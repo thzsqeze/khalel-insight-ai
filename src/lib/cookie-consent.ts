@@ -9,7 +9,9 @@ export function parseCookieConsent(value: string | undefined | null): CookieCons
 }
 
 export function readCookieConsent(cookieHeader: string): CookieConsent | null {
-  const matches = cookieHeader.split(";").filter(cookie => cookie.slice(0, cookie.indexOf("=")).trim() === COOKIE_CONSENT_NAME);
+  const matches = cookieHeader
+    .split(";")
+    .filter((cookie) => cookie.slice(0, cookie.indexOf("=")).trim() === COOKIE_CONSENT_NAME);
   // Conflicting path/domain cookies must never grant optional diagnostics.
   if (matches.length !== 1) return null;
   const cookie = matches[0];

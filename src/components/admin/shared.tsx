@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Circle, CircleCheck, Clock3, LoaderCircle, ArrowUpRight, Inbox, TriangleAlert, Search, RefreshCw } from "lucide-react";
+import {
+  Circle,
+  CircleCheck,
+  Clock3,
+  LoaderCircle,
+  ArrowUpRight,
+  Inbox,
+  TriangleAlert,
+  Search,
+  RefreshCw,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,20 +22,249 @@ import { categories, statuses, type Issue, type Priority, type Status } from "@/
 import { cn, formatDate } from "@/lib/utils";
 import type { Filters } from "@/lib/analytics";
 
-const statusClasses: Record<Status, string> = { new: "border-[#dfe2d9] bg-[#f4f5ef] text-[#656e5a]", under_review: "border-[#e8ddc4] bg-[#f7f2e6] text-[#8a7038]", in_progress: "border-[#d8e2d7] bg-[#edf2e8] text-[#537145]", resolved: "border-[#cfded4] bg-[#e8f0e9] text-[#315747]" };
-const statusIcons = { new: Circle, under_review: Clock3, in_progress: LoaderCircle, resolved: CircleCheck };
-export function StatusBadge({ status }: { status: Status }) { const t = useTranslations("statuses"); const Icon = statusIcons[status]; return <Badge className={cn("whitespace-nowrap rounded-md py-1 text-[10px] font-medium", statusClasses[status])}><Icon className="size-3" strokeWidth={1.6} />{t(status)}</Badge>; }
-export function PriorityBadge({ priority }: { priority: Priority }) { const t = useTranslations("priorities"); return <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-muted-foreground"><span className={cn("size-1.5 rounded-full", { low: "bg-[#b0b5a7]", medium: "bg-[#b3a26c]", high: "bg-[#b57d52]", critical: "bg-[#ad5d50]" }[priority])} />{t(priority)}</span>; }
-export function DataError({ error, retry }: { error: string; retry: () => void }) { const t = useTranslations("admin"); const e = useTranslations("apiErrors"); return <div role="alert" className="flex flex-col items-center gap-4 rounded-lg border border-border bg-white p-12 text-center"><TriangleAlert className="size-7 text-[#9d7b49]" /><p>{e.has(error) ? e(error) : t("error")}</p>{error === "unauthorized" ? <Button asChild><Link href="/login">{t("backToLogin")}</Link></Button> : <Button variant="outline" onClick={retry}><RefreshCw />{t("refresh")}</Button>}</div>; }
-export function EmptyState({ filtered = false }: { filtered?: boolean }) { const t = useTranslations("admin"); return <div className="flex flex-col items-center justify-center gap-3 px-5 py-14 text-center"><Inbox className="mb-1 size-6 text-[#929987]" strokeWidth={1.5} /><p className="text-sm font-medium">{t(filtered ? "noResults" : "emptyTitle")}</p><p className="max-w-sm text-xs leading-6 text-muted-foreground">{t(filtered ? "noResultsBody" : "emptyBody")}</p></div>; }
-export function DashboardSkeleton() { const t = useTranslations("admin"); return <div role="status" aria-label={t("loading")} className="space-y-6"><Skeleton className="h-8 w-64" /><Skeleton className="h-4 w-80 max-w-full" /><Skeleton className="h-32 w-full bg-white" /><div className="grid gap-5 xl:grid-cols-[1.7fr_1fr]"><Skeleton className="h-80 bg-white" /><Skeleton className="h-80 bg-white" /></div><Skeleton className="h-64 bg-white" /></div>; }
+const statusClasses: Record<Status, string> = {
+  new: "border-[#dfe2d9] bg-[#f4f5ef] text-[#656e5a]",
+  under_review: "border-[#e8ddc4] bg-[#f7f2e6] text-[#8a7038]",
+  in_progress: "border-[#d8e2d7] bg-[#edf2e8] text-[#537145]",
+  resolved: "border-[#cfded4] bg-[#e8f0e9] text-[#315747]",
+};
+const statusIcons = {
+  new: Circle,
+  under_review: Clock3,
+  in_progress: LoaderCircle,
+  resolved: CircleCheck,
+};
+export function StatusBadge({ status }: { status: Status }) {
+  const t = useTranslations("statuses");
+  const Icon = statusIcons[status];
+  return (
+    <Badge
+      className={cn(
+        "whitespace-nowrap rounded-md py-1 text-[10px] font-medium",
+        statusClasses[status],
+      )}
+    >
+      <Icon className="size-3" strokeWidth={1.6} />
+      {t(status)}
+    </Badge>
+  );
+}
+export function PriorityBadge({ priority }: { priority: Priority }) {
+  const t = useTranslations("priorities");
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-muted-foreground">
+      <span
+        className={cn(
+          "size-1.5 rounded-full",
+          {
+            low: "bg-[#b0b5a7]",
+            medium: "bg-[#b3a26c]",
+            high: "bg-[#b57d52]",
+            critical: "bg-[#ad5d50]",
+          }[priority],
+        )}
+      />
+      {t(priority)}
+    </span>
+  );
+}
+export function DataError({ error, retry }: { error: string; retry: () => void }) {
+  const t = useTranslations("admin");
+  const e = useTranslations("apiErrors");
+  return (
+    <div
+      role="alert"
+      className="flex flex-col items-center gap-4 rounded-lg border border-border bg-white p-12 text-center"
+    >
+      <TriangleAlert className="size-7 text-[#9d7b49]" />
+      <p>{e.has(error) ? e(error) : t("error")}</p>
+      {error === "unauthorized" ? (
+        <Button asChild>
+          <Link href="/login">{t("backToLogin")}</Link>
+        </Button>
+      ) : (
+        <Button variant="outline" onClick={retry}>
+          <RefreshCw />
+          {t("refresh")}
+        </Button>
+      )}
+    </div>
+  );
+}
+export function EmptyState({ filtered = false }: { filtered?: boolean }) {
+  const t = useTranslations("admin");
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 px-5 py-14 text-center">
+      <Inbox className="mb-1 size-6 text-[#929987]" strokeWidth={1.5} />
+      <p className="text-sm font-medium">{t(filtered ? "noResults" : "emptyTitle")}</p>
+      <p className="max-w-sm text-xs leading-6 text-muted-foreground">
+        {t(filtered ? "noResultsBody" : "emptyBody")}
+      </p>
+    </div>
+  );
+}
+export function DashboardSkeleton() {
+  const t = useTranslations("admin");
+  return (
+    <div role="status" aria-label={t("loading")} className="space-y-6">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-4 w-80 max-w-full" />
+      <Skeleton className="h-32 w-full bg-white" />
+      <div className="grid gap-5 xl:grid-cols-[1.7fr_1fr]">
+        <Skeleton className="h-80 bg-white" />
+        <Skeleton className="h-80 bg-white" />
+      </div>
+      <Skeleton className="h-64 bg-white" />
+    </div>
+  );
+}
 export function IssueTable({ issues, compact = false }: { issues: Issue[]; compact?: boolean }) {
-  const t = useTranslations("admin"); const c = useTranslations("categories"); const locale = useLocale();
+  const t = useTranslations("admin");
+  const c = useTranslations("categories");
+  const locale = useLocale();
   if (!issues.length) return <EmptyState filtered />;
-  return <div className="overflow-x-auto"><table className="admin-table"><thead><tr><th>{t("topic")}</th>{!compact && <th>{t("category")}</th>}<th>{t("status")}</th>{!compact && <th>{t("priority")}</th>}<th>{t("reportCount")}</th>{!compact && <th>{t("updated")}</th>}<th><span className="sr-only">{t("openIssue")}</span></th></tr></thead><tbody>{issues.map(issue => <tr key={issue.id}><td className={compact ? "min-w-[180px] max-w-[320px]" : "min-w-[220px] max-w-[360px]"}><Link href={`/admin/issues/${issue.id}`} className="group"><span className="block text-[10px] tracking-wide text-muted-foreground">{issue.reference}</span><span className="mt-1 block text-[13px] font-medium leading-5 text-foreground group-hover:text-primary">{locale === "kk" && issue.titleKk ? issue.titleKk : issue.title}</span></Link></td>{!compact && <td><span className="whitespace-nowrap text-xs text-muted-foreground">{c(issue.category)}</span></td>}<td><StatusBadge status={issue.status} /></td>{!compact && <td><PriorityBadge priority={issue.priority} /></td>}<td><span className="inline-flex min-w-7 items-center justify-center text-xs font-medium tabular-nums text-foreground">{issue.count}</span></td>{!compact && <td className="whitespace-nowrap text-muted-foreground">{formatDate(issue.updatedAt, locale)}</td>}<td><Link href={`/admin/issues/${issue.id}`} aria-label={`${t("openIssue")}: ${issue.title}`} className="inline-flex rounded-md p-1 text-muted-foreground hover:bg-[#f0f2e9] hover:text-primary"><ArrowUpRight className="size-4" /></Link></td></tr>)}</tbody></table></div>;
+  return (
+    <div className="overflow-x-auto">
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>{t("topic")}</th>
+            {!compact && <th>{t("category")}</th>}
+            <th>{t("status")}</th>
+            {!compact && <th>{t("priority")}</th>}
+            <th>{t("reportCount")}</th>
+            {!compact && <th>{t("updated")}</th>}
+            <th>
+              <span className="sr-only">{t("openIssue")}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {issues.map((issue) => (
+            <tr key={issue.id}>
+              <td
+                className={compact ? "min-w-[180px] max-w-[320px]" : "min-w-[220px] max-w-[360px]"}
+              >
+                <Link href={`/admin/issues/${issue.id}`} className="group">
+                  <span className="block text-[10px] tracking-wide text-muted-foreground">
+                    {issue.reference}
+                  </span>
+                  <span className="mt-1 block text-[13px] font-medium leading-5 text-foreground group-hover:text-primary">
+                    {locale === "kk" && issue.titleKk ? issue.titleKk : issue.title}
+                  </span>
+                </Link>
+              </td>
+              {!compact && (
+                <td>
+                  <span className="whitespace-nowrap text-xs text-muted-foreground">
+                    {c(issue.category)}
+                  </span>
+                </td>
+              )}
+              <td>
+                <StatusBadge status={issue.status} />
+              </td>
+              {!compact && (
+                <td>
+                  <PriorityBadge priority={issue.priority} />
+                </td>
+              )}
+              <td>
+                <span className="inline-flex min-w-7 items-center justify-center text-xs font-medium tabular-nums text-foreground">
+                  {issue.count}
+                </span>
+              </td>
+              {!compact && (
+                <td className="whitespace-nowrap text-muted-foreground">
+                  {formatDate(issue.updatedAt, locale)}
+                </td>
+              )}
+              <td>
+                <Link
+                  href={`/admin/issues/${issue.id}`}
+                  aria-label={`${t("openIssue")}: ${issue.title}`}
+                  className="inline-flex rounded-md p-1 text-muted-foreground hover:bg-[#f0f2e9] hover:text-primary"
+                >
+                  <ArrowUpRight className="size-4" />
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
-export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (filters: Filters) => void }) {
-  const t = useTranslations("admin"); const c = useTranslations("categories"); const s = useTranslations("statuses");
-  return <div className="flex flex-wrap items-center gap-2.5"><div className="relative min-w-[190px] flex-1"><Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" /><Input aria-label={t("search")} placeholder={t("search")} className="h-10 pl-9" value={filters.query} onChange={e => onChange({ ...filters, query: e.target.value })} /></div><Select aria-label={t("category")} value={filters.category} onChange={e => onChange({ ...filters, category: e.target.value as Filters["category"] })}><option value="all">{t("allCategories")}</option>{categories.map(category => <option key={category} value={category}>{c(category)}</option>)}</Select><Select aria-label={t("status")} value={filters.status} onChange={e => onChange({ ...filters, status: e.target.value as Filters["status"] })}><option value="all">{t("allStatuses")}</option>{statuses.map(status => <option key={status} value={status}>{s(status)}</option>)}</Select><PeriodSelect value={filters.days} onChange={days => onChange({ ...filters, days })} /></div>;
+export function FilterBar({
+  filters,
+  onChange,
+}: {
+  filters: Filters;
+  onChange: (filters: Filters) => void;
+}) {
+  const t = useTranslations("admin");
+  const c = useTranslations("categories");
+  const s = useTranslations("statuses");
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <div className="relative min-w-[190px] flex-1">
+        <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" />
+        <Input
+          aria-label={t("search")}
+          placeholder={t("search")}
+          className="h-10 pl-9"
+          value={filters.query}
+          onChange={(e) => onChange({ ...filters, query: e.target.value })}
+        />
+      </div>
+      <Select
+        aria-label={t("category")}
+        value={filters.category}
+        onChange={(e) => onChange({ ...filters, category: e.target.value as Filters["category"] })}
+      >
+        <option value="all">{t("allCategories")}</option>
+        {categories.map((category) => (
+          <option key={category} value={category}>
+            {c(category)}
+          </option>
+        ))}
+      </Select>
+      <Select
+        aria-label={t("status")}
+        value={filters.status}
+        onChange={(e) => onChange({ ...filters, status: e.target.value as Filters["status"] })}
+      >
+        <option value="all">{t("allStatuses")}</option>
+        {statuses.map((status) => (
+          <option key={status} value={status}>
+            {s(status)}
+          </option>
+        ))}
+      </Select>
+      <PeriodSelect value={filters.days} onChange={(days) => onChange({ ...filters, days })} />
+    </div>
+  );
 }
-export function PeriodSelect({ value, onChange }: { value: number; onChange: (days: number) => void }) { const t = useTranslations("admin"); return <Select aria-label={t("days")} value={value} onChange={e => onChange(Number(e.target.value))} className="text-xs">{[7, 30, 90].map(days => <option value={days} key={days}>{t("lastDays", { days })}</option>)}</Select>; }
+export function PeriodSelect({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (days: number) => void;
+}) {
+  const t = useTranslations("admin");
+  return (
+    <Select
+      aria-label={t("days")}
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="text-xs"
+    >
+      {[7, 30, 90].map((days) => (
+        <option value={days} key={days}>
+          {t("lastDays", { days })}
+        </option>
+      ))}
+    </Select>
+  );
+}

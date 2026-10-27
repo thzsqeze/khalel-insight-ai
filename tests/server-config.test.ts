@@ -1,27 +1,70 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { supabasePublicConfig, supabaseServiceConfig } from '@/lib/server/config';
-afterEach(()=>{vi.unstubAllEnvs();vi.restoreAllMocks();});
-describe('Supabase configuration',()=>{
- it('uses the dedicated deployment credentials instead of stale platform aliases',()=>{
-  vi.stubEnv('UNIVOICE_SUPABASE_URL','https://selected.supabase.co');vi.stubEnv('UNIVOICE_SUPABASE_PUBLISHABLE_KEY','sb_publishable_selected');vi.stubEnv('UNIVOICE_SUPABASE_SECRET_KEY','sb_secret_selected');
-  vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL','https://stale.supabase.co');vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY','sb_publishable_stale');vi.stubEnv('SUPABASE_SECRET_KEY','sb_secret_stale');
-  expect(supabasePublicConfig()).toEqual({url:'https://selected.supabase.co',key:'sb_publishable_selected'});
-  expect(supabaseServiceConfig()).toEqual({url:'https://selected.supabase.co',key:'sb_secret_selected'});
- });
- it('never combines a dedicated URL with credentials from a different legacy project',()=>{
-  vi.spyOn(console,'error').mockImplementation(()=>{});
-  vi.stubEnv('UNIVOICE_SUPABASE_URL','https://selected.supabase.co');vi.stubEnv('UNIVOICE_SUPABASE_PUBLISHABLE_KEY','');vi.stubEnv('UNIVOICE_SUPABASE_SECRET_KEY','');
-  vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY','stale-publishable');vi.stubEnv('SUPABASE_SECRET_KEY','stale-secret');
-  expect(()=>supabasePublicConfig()).toThrow('UNIVOICE_SUPABASE_PUBLISHABLE_KEY');
-  expect(()=>supabaseServiceConfig()).toThrow('UNIVOICE_SUPABASE_SECRET_KEY');
- });
- it('reports a missing configuration name without exposing configured secrets',()=>{
-  const log=vi.spyOn(console,'error').mockImplementation(()=>{});
-  vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL','');vi.stubEnv('SUPABASE_SECRET_KEY','private-key-do-not-log');
-  expect(()=>supabaseServiceConfig()).toThrow('NEXT_PUBLIC_SUPABASE_URL');
-  expect(log).toHaveBeenCalledWith('[UniVoice configuration] Missing required variable: NEXT_PUBLIC_SUPABASE_URL');
-  expect(JSON.stringify(log.mock.calls)).not.toContain('private-key-do-not-log');
- });
- it('uses modern publishable and server secret keys before legacy keys',()=>{vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL','https://project.supabase.co');vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY','sb_publishable_test');vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY','legacy-anon');vi.stubEnv('SUPABASE_SECRET_KEY','sb_secret_test');vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY','legacy-service');expect(supabasePublicConfig()).toEqual({url:'https://project.supabase.co',key:'sb_publishable_test'});expect(supabaseServiceConfig()).toEqual({url:'https://project.supabase.co',key:'sb_secret_test'});});
- it('supports legacy Supabase projects without fabricating configuration',()=>{vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL','https://project.supabase.co');vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY','');vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY','legacy-anon');vi.stubEnv('SUPABASE_SECRET_KEY','');vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY','legacy-service');expect(supabasePublicConfig().key).toBe('legacy-anon');expect(supabaseServiceConfig().key).toBe('legacy-service');vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY','');expect(()=>supabaseServiceConfig()).toThrow('SUPABASE_SECRET_KEY');});
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { supabasePublicConfig, supabaseServiceConfig } from "@/lib/server/config";
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+describe("Supabase configuration", () => {
+  it("uses the dedicated deployment credentials instead of stale platform aliases", () => {
+    vi.stubEnv("UNIVOICE_SUPABASE_URL", "https://selected.supabase.co");
+    vi.stubEnv("UNIVOICE_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_selected");
+    vi.stubEnv("UNIVOICE_SUPABASE_SECRET_KEY", "sb_secret_selected");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://stale.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_stale");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "sb_secret_stale");
+    expect(supabasePublicConfig()).toEqual({
+      url: "https://selected.supabase.co",
+      key: "sb_publishable_selected",
+    });
+    expect(supabaseServiceConfig()).toEqual({
+      url: "https://selected.supabase.co",
+      key: "sb_secret_selected",
+    });
+  });
+  it("never combines a dedicated URL with credentials from a different legacy project", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubEnv("UNIVOICE_SUPABASE_URL", "https://selected.supabase.co");
+    vi.stubEnv("UNIVOICE_SUPABASE_PUBLISHABLE_KEY", "");
+    vi.stubEnv("UNIVOICE_SUPABASE_SECRET_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "stale-publishable");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "stale-secret");
+    expect(() => supabasePublicConfig()).toThrow("UNIVOICE_SUPABASE_PUBLISHABLE_KEY");
+    expect(() => supabaseServiceConfig()).toThrow("UNIVOICE_SUPABASE_SECRET_KEY");
+  });
+  it("reports a missing configuration name without exposing configured secrets", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "private-key-do-not-log");
+    expect(() => supabaseServiceConfig()).toThrow("NEXT_PUBLIC_SUPABASE_URL");
+    expect(log).toHaveBeenCalledWith(
+      "[UniVoice configuration] Missing required variable: NEXT_PUBLIC_SUPABASE_URL",
+    );
+    expect(JSON.stringify(log.mock.calls)).not.toContain("private-key-do-not-log");
+  });
+  it("uses modern publishable and server secret keys before legacy keys", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "legacy-anon");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "sb_secret_test");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "legacy-service");
+    expect(supabasePublicConfig()).toEqual({
+      url: "https://project.supabase.co",
+      key: "sb_publishable_test",
+    });
+    expect(supabaseServiceConfig()).toEqual({
+      url: "https://project.supabase.co",
+      key: "sb_secret_test",
+    });
+  });
+  it("supports legacy Supabase projects without fabricating configuration", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "legacy-anon");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "legacy-service");
+    expect(supabasePublicConfig().key).toBe("legacy-anon");
+    expect(supabaseServiceConfig().key).toBe("legacy-service");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    expect(() => supabaseServiceConfig()).toThrow("SUPABASE_SECRET_KEY");
+  });
 });
