@@ -62,7 +62,10 @@ test("a reference shows status while only a personal code opens the conversation
 
   await input.fill("UV-0000000000");
   await submit.click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  // Scoped to the message: Next.js renders its route announcer with role=alert too.
+  await expect(
+    page.getByRole("alert").filter({ hasText: ru.commonPublic.errors.not_found }),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: ru.track.statusOnlyTitle })).toHaveCount(0);
 
   await page.getByRole("button", { name: "ҚАЗ", exact: true }).click();
