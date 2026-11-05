@@ -57,21 +57,23 @@ export function InvitationSetup() {
     }
   }
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[#f5f6f1] p-6">
-      <section className="w-full max-w-md rounded-2xl border border-border bg-white p-8 shadow-sm">
-        <ShieldCheck className="mb-5 size-9 text-primary" />
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t(done ? "passwordReady" : "setupTitle")}
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          {t(done ? "passwordReadyBody" : "setupBody")}
-        </p>
+    <main className="public-container min-h-dvh bg-[#f5f6f1] py-12 sm:py-20">
+      <section className="grid gap-8 rounded-2xl border border-border bg-white p-6 sm:p-10 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <ShieldCheck className="mb-5 size-9 text-primary" />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t(done ? "passwordReady" : "setupTitle")}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            {t(done ? "passwordReadyBody" : "setupBody")}
+          </p>
+        </div>
         {done ? (
           <Button asChild className="mt-6">
             <Link href="/login">{t("signIn")}</Link>
           </Button>
         ) : (
-          <form onSubmit={submit} className="mt-6 space-y-4">
+          <form onSubmit={submit} className="space-y-4">
             <label className="block text-sm font-medium">
               {t("password")}
               <Input

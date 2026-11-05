@@ -23,6 +23,9 @@ import { cn } from "@/lib/utils";
 import { requestJson } from "@/lib/client-api";
 import type { AdminSession } from "@/lib/types";
 
+const workspaceContainerClass =
+  "mx-auto w-full max-w-[1800px] px-5 sm:px-8 lg:px-[clamp(2rem,2vw,4.5rem)]";
+
 export function AdminShell({
   session,
   children,
@@ -99,8 +102,8 @@ export function AdminShell({
         )}
       >
         <div className="flex h-[82px] shrink-0 items-center justify-between px-4 lg:px-6">
-          <Link href="/" aria-label="UniVoice">
-            <Brand />
+          <Link href="/" aria-label="UniVoice AI">
+            <Brand compact />
           </Link>
           <Button
             variant="ghost"
@@ -206,56 +209,60 @@ export function AdminShell({
         </div>
       </aside>
       <div className="min-w-0 lg:pl-[232px]">
-        <header className="flex h-[64px] items-center justify-between gap-4 border-b border-[#e1e7e2] bg-white px-5 sm:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button
-              id="admin-menu-toggle"
-              variant="ghost"
-              size="icon"
-              className="-ml-2 lg:hidden"
-              aria-label={t("menu")}
-              onClick={() => setMenuOpen(true)}
-            >
-              <Menu />
-            </Button>
-            <p className="truncate text-xs text-[#74786e]">
-              <span className="hidden sm:inline">
-                {t("workspace")}
-                <span className="mx-3 text-[#b8bcb0]">/</span>
-              </span>
-              <span className="text-[#242722]">{current?.label ?? t("issues")}</span>
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3 sm:gap-6">
-            <div
-              className="flex items-center gap-0.5 rounded-md border border-[#dedfd7] p-0.5"
-              role="group"
-              aria-label={t("language")}
-            >
-              {["ru", "kk"].map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => changeLanguage(lang)}
-                  disabled={pending}
-                  aria-pressed={locale === lang}
-                  className={cn(
-                    "rounded px-2.5 py-1.5 text-[10px] font-medium",
-                    locale === lang
-                      ? "bg-white text-[#242722]"
-                      : "text-[#74786e] hover:text-[#242722]",
-                  )}
-                >
-                  {lang === "ru" ? "РУС" : "ҚАЗ"}
-                </button>
-              ))}
+        <header className="border-b border-[#e1e7e2] bg-white">
+          <div
+            className={cn(workspaceContainerClass, "flex h-16 items-center justify-between gap-4")}
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <Button
+                id="admin-menu-toggle"
+                variant="ghost"
+                size="icon"
+                className="-ml-2 lg:hidden"
+                aria-label={t("menu")}
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu />
+              </Button>
+              <p className="truncate text-xs text-[#74786e]">
+                <span className="hidden sm:inline">
+                  {t("workspace")}
+                  <span className="mx-3 text-[#b8bcb0]">/</span>
+                </span>
+                <span className="text-[#242722]">{current?.label ?? t("issues")}</span>
+              </p>
             </div>
-            <Link
-              href="/"
-              className="hidden items-center gap-1.5 text-xs text-[#74786e] hover:text-primary sm:flex"
-            >
-              {t("backHome")}
-              <ArrowUpRight className="size-3.5" />
-            </Link>
+            <div className="flex shrink-0 items-center gap-3 sm:gap-6">
+              <div
+                className="flex items-center gap-0.5 rounded-md border border-[#dedfd7] p-0.5"
+                role="group"
+                aria-label={t("language")}
+              >
+                {["ru", "kk"].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => changeLanguage(lang)}
+                    disabled={pending}
+                    aria-pressed={locale === lang}
+                    className={cn(
+                      "rounded px-2.5 py-1.5 text-[10px] font-medium",
+                      locale === lang
+                        ? "bg-white text-[#242722]"
+                        : "text-[#74786e] hover:text-[#242722]",
+                    )}
+                  >
+                    {lang === "ru" ? "РУС" : "ҚАЗ"}
+                  </button>
+                ))}
+              </div>
+              <Link
+                href="/"
+                className="hidden items-center gap-1.5 text-xs text-[#74786e] hover:text-primary sm:flex"
+              >
+                {t("backHome")}
+                <ArrowUpRight className="size-3.5" />
+              </Link>
+            </div>
           </div>
         </header>
         {error && (
@@ -263,7 +270,7 @@ export function AdminShell({
             {t("error")}
           </p>
         )}
-        <main id="admin-main" className="mx-auto max-w-[1640px] p-5 sm:p-8 xl:px-9 xl:py-8">
+        <main id="admin-main" className={cn(workspaceContainerClass, "min-w-0 py-5 sm:py-8")}>
           {children}
         </main>
       </div>

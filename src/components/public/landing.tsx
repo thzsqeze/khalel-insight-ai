@@ -97,13 +97,13 @@ export function Landing() {
   const t = useTranslations("landing");
   return (
     <>
-      <section className="mx-auto max-w-[1320px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14 lg:px-12 lg:pb-16">
+      <section className="public-container pb-12 pt-10 sm:pt-14 lg:pb-16">
         <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-          <div>
+          <div className="min-w-0">
             <p className="mb-7 max-w-md text-xs font-semibold leading-6 tracking-[1.2px] text-primary">
               {t("eyebrow")}
             </p>
-            <h1 className="text-[59px] font-medium leading-[1.01] tracking-[-3px] text-foreground sm:text-[80px] sm:tracking-[-4px] xl:text-[94px] xl:tracking-[-5px]">
+            <h1 className="text-[59px] font-medium leading-[1.01] tracking-[-3px] text-foreground max-[359px]:text-[54px] sm:text-[80px] sm:tracking-[-4px] xl:text-[94px] xl:tracking-[-5px]">
               {t("titleFirst")}
               <br />
               {t("titleSecond")}
@@ -176,11 +176,11 @@ export function Landing() {
           ))}
         </div>
       </section>
-      <div className="mx-auto max-w-[1320px] px-5 pb-12 sm:px-8 lg:px-12 lg:pb-16">
+      <div className="public-container pb-12 lg:pb-16">
         <CategoryChooser />
       </div>
       <section id="how-it-works" className="scroll-mt-8 bg-[#eeeee6]">
-        <div className="mx-auto max-w-[1320px] px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
+        <div className="public-container py-16 lg:py-20">
           <p className="text-xs font-medium tracking-[1px] text-muted-foreground">
             {t("sectionOne")}
           </p>
@@ -220,7 +220,7 @@ export function Landing() {
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-[1320px] px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
+      <section className="public-container py-16 lg:py-20">
         <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
           <div>
             <p className="text-xs font-medium tracking-[1px] text-muted-foreground">
@@ -264,7 +264,7 @@ export function Landing() {
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-[1320px] px-5 pb-16 sm:px-8 lg:px-12">
+      <section className="public-container pb-16">
         <div className="grid gap-7 rounded-2xl border border-[#d4ddc3] bg-[#e8eedb] p-7 sm:p-9 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
           <div>
             <ShieldCheck className="mb-5 size-9 text-primary" strokeWidth={1.5} />
@@ -285,7 +285,7 @@ export function Landing() {
         </div>
       </section>
       <section className="bg-[#293f33] text-[#f6f5f1]">
-        <div className="mx-auto max-w-[1320px] px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
+        <div className="public-container py-14 lg:py-20">
           <p className="text-xs font-medium tracking-[1px] text-[#c1d09e]">{t("closingLabel")}</p>
           <div className="mt-7 grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-16">
             <h2 className="whitespace-pre-line text-[37px] font-medium leading-[1.1] tracking-[-1.6px] sm:text-[51px]">

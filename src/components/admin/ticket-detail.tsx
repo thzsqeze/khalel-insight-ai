@@ -211,7 +211,7 @@ export function TicketDetail({
                       date={ticket.createdAt}
                       locale={locale}
                     />
-                    <p className="mt-4 whitespace-pre-wrap break-words text-[13px] leading-7 text-[#485a4e]">
+                    <p className="mt-4 max-w-[90ch] whitespace-pre-wrap break-words text-[13px] leading-7 text-[#485a4e]">
                       {ticket.description}
                     </p>
                     {ticket.faculty && (
@@ -250,7 +250,7 @@ export function TicketDetail({
                         internal={message.kind === "note"}
                         staff={message.kind !== "follow_up"}
                       />
-                      <p className="mt-4 whitespace-pre-wrap break-words text-[13px] leading-7 text-[#485a4e]">
+                      <p className="mt-4 max-w-[90ch] whitespace-pre-wrap break-words text-[13px] leading-7 text-[#485a4e]">
                         {message.body}
                       </p>
                     </article>

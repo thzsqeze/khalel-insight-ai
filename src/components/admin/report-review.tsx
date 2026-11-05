@@ -94,7 +94,7 @@ export function ReportReview({
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {t("reportText")}
         </p>
-        <p className="whitespace-pre-wrap break-words rounded-lg bg-[#f5f6f0] p-4 text-sm leading-7 text-[#555d4d]">
+        <p className="max-w-[90ch] whitespace-pre-wrap break-words rounded-lg bg-[#f5f6f0] p-4 text-sm leading-7 text-[#555d4d]">
           {report.description}
         </p>
         {report.faculty && (

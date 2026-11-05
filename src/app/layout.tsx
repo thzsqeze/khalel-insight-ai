@@ -7,7 +7,7 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("system");
   return {
-    title: { default: t("metaTitle"), template: "%s · UniVoice" },
+    title: { default: t("metaTitle"), template: "%s · UniVoice AI" },
     description: t("metaDescription"),
   };
 }

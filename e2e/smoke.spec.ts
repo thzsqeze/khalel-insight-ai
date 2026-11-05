@@ -7,7 +7,7 @@ test("Kazakh switch persists across public navigation and real login", async ({
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
-  await expect(page).toHaveTitle(/UniVoice/);
+  await expect(page).toHaveTitle(/UniVoice AI/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({

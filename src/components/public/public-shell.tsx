@@ -70,8 +70,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="relative z-30 border-b border-border bg-background">
-        <div className="mx-auto flex h-[88px] max-w-[1320px] items-center justify-between gap-5 px-5 max-[359px]:gap-2 max-[359px]:px-3 sm:px-8 lg:px-12">
-          <Link href="/" aria-label={`UniVoice — ${t("home")}`} onClick={() => setOpen(false)}>
+        <div className="public-container flex h-[88px] items-center justify-between gap-5 max-[359px]:gap-2 max-[359px]:px-3">
+          <Link href="/" aria-label={`UniVoice AI — ${t("home")}`} onClick={() => setOpen(false)}>
             <PublicLogo />
           </Link>
           <span className="hidden max-w-[150px] border-l border-border pl-4 text-xs leading-4 text-muted-foreground xl:block">
@@ -114,14 +114,14 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         {localeError && (
-          <p role="alert" className="mx-auto max-w-[1320px] px-5 pb-2 text-xs text-red-700">
+          <p role="alert" className="public-container pb-2 text-xs text-red-700">
             {t("switchError")}
           </p>
         )}
         {open && (
           <nav
             id="public-mobile-nav"
-            className="space-y-1 border-t border-border bg-background px-5 py-4 lg:hidden"
+            className="public-container space-y-1 border-t border-border bg-background py-4 lg:hidden"
             aria-label={t("openMenu")}
           >
             {navItems.map((item) => (
@@ -153,7 +153,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       </header>
       <main>{children}</main>
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto max-w-[1320px] px-5 py-10 sm:px-8 lg:px-12">
+        <div className="public-container py-10">
           <div className="flex flex-col justify-between gap-7 md:flex-row md:items-start">
             <div>
               <Link href="/" aria-label={t("home")}>

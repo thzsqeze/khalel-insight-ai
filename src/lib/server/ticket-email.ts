@@ -81,8 +81,8 @@ export async function forwardTicket(ticketId: string, actorId: string, requestId
       body: JSON.stringify({
         from: config.from,
         to: [reservation.recipient],
-        subject: `UniVoice · ${reservation.reference}`,
-        text: `Вам направлено обращение ${reservation.reference}.\nПерейдите в защищённый кабинет UniVoice для рассмотрения:\n${config.origin}/admin/tickets/${ticketId}\n\nӨтінішті қарастыру үшін UniVoice қорғалған кабинетіне кіріңіз.\n\nПисьмо не содержит текст обращения. Для доступа нужна учётная запись сотрудника. Ответьте автору в кабинете, а не на это письмо.`,
+        subject: `UniVoice AI · ${reservation.reference}`,
+        text: `Вам направлено обращение ${reservation.reference}.\nПерейдите в защищённый кабинет UniVoice AI для рассмотрения:\n${config.origin}/admin/tickets/${ticketId}\n\nӨтінішті қарастыру үшін UniVoice AI қорғалған кабинетіне кіріңіз.\n\nПисьмо не содержит текст обращения. Для доступа нужна учётная запись сотрудника. Ответьте автору в кабинете, а не на это письмо.`,
       }),
     });
     if (!response.ok) {

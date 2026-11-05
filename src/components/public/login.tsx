@@ -51,15 +51,15 @@ export function PublicLogin() {
     }
   }
   return (
-    <div className="mx-auto max-w-[1150px] px-5 py-10 sm:px-8 sm:py-16 lg:py-20">
-      <div className="grid overflow-hidden rounded-2xl border border-border bg-[#fffefa] lg:grid-cols-[1fr_1fr]">
-        <div className="relative border-b border-[#d8e1c5] bg-[#e8eedb] p-8 sm:p-12 lg:border-b-0 lg:border-r">
+    <div className="mx-auto w-full max-w-[1150px] px-5 py-10 sm:px-8 sm:py-16 lg:py-20">
+      <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-border bg-[#fffefa] lg:grid-cols-2">
+        <div className="relative min-w-0 border-b border-[#d8e1c5] bg-[#e8eedb] p-6 sm:p-12 lg:border-b-0 lg:border-r">
           <div className="relative">
             <PublicLogo />
             <p className="mt-14 text-xs font-semibold tracking-[1.7px] text-muted-foreground">
               {t("eyebrow")}
             </p>
-            <h1 className="mt-5 whitespace-pre-line text-[44px] font-medium leading-[1.05] tracking-[-2px] text-foreground sm:text-[54px]">
+            <h1 className="mt-5 whitespace-pre-line break-words text-[36px] font-medium leading-[1.05] tracking-[-2px] text-foreground sm:text-[54px]">
               {t("title")}
             </h1>
             <p className="mt-5 max-w-xs text-sm leading-7 text-muted-foreground">
@@ -84,7 +84,7 @@ export function PublicLogin() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col justify-center p-6 sm:p-12">
+        <div className="flex min-w-0 flex-col justify-center p-6 sm:p-12">
           <span className="mb-5 grid size-11 place-items-center rounded-xl bg-[#f0f0e9] text-muted-foreground">
             <LayoutDashboard className="size-5" strokeWidth={1.5} />
           </span>

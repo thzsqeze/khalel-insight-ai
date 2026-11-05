@@ -1,11 +1,20 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-export function Brand({ inverse = false, className }: { inverse?: boolean; className?: string }) {
+export function Brand({
+  inverse = false,
+  compact = false,
+  className,
+}: {
+  inverse?: boolean;
+  compact?: boolean;
+  className?: string;
+}) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2.5 text-[#242722]",
+        "inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-[#242722]",
+        !compact && "sm:gap-2.5",
         inverse && "text-white",
         className,
       )}
@@ -18,10 +27,15 @@ export function Brand({ inverse = false, className }: { inverse?: boolean; class
         aria-hidden="true"
         unoptimized
         loading="eager"
-        className="h-auto w-12 shrink-0"
+        className={cn("h-auto shrink-0", compact ? "w-8" : "w-10 sm:w-12")}
       />
-      <span className="text-[23px] font-semibold leading-none tracking-[-1.15px]">
-        UniVoice
+      <span
+        className={cn(
+          "text-[20px] font-semibold leading-none tracking-[-1.15px]",
+          !compact && "sm:text-[23px]",
+        )}
+      >
+        UniVoice AI
         <span className="ml-0.5 text-primary" aria-hidden="true">
           .
         </span>

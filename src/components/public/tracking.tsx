@@ -58,8 +58,8 @@ export function Tracking() {
     }
   }
   return (
-    <div className="mx-auto max-w-[1100px] px-5 py-12 sm:px-8 sm:py-16 lg:py-20">
-      <div className="grid gap-10 lg:grid-cols-[0.95fr_1.1fr] lg:gap-16">
+    <div className="public-container py-12 sm:py-16 lg:py-20">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)] lg:gap-16">
         <div>
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <span className="text-xs font-semibold tracking-[1.7px] text-primary">

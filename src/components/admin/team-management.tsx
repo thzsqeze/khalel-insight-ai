@@ -244,7 +244,7 @@ export function TeamManagement({ currentUserId }: { currentUserId: string }) {
     }
   }
   return (
-    <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-w-0 space-y-8">
       <header>
         <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-primary">
           <ShieldCheck className="size-4" />
@@ -258,7 +258,7 @@ export function TeamManagement({ currentUserId }: { currentUserId: string }) {
           <MailPlus className="size-5 text-primary" />
           {t("inviteTitle")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("inviteBody")}</p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{t("inviteBody")}</p>
         <form onSubmit={invite} className="mt-4 flex flex-col gap-3 sm:flex-row">
           <Input
             aria-label={t("employeeEmail")}
@@ -364,7 +364,9 @@ export function TeamManagement({ currentUserId }: { currentUserId: string }) {
             <Building2 className="size-5 text-primary" />
             {t("departments")}
           </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("departmentsBody")}</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+            {t("departmentsBody")}
+          </p>
         </div>
         {departments.error ? (
           <DataError error={departments.error} retry={departments.reload} />

@@ -63,6 +63,13 @@ textarea {
 html {
   scroll-behavior: smooth;
 }
+@layer components {
+  .public-container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 4vw, 80px);
+  }
+}
 .admin-table {
   width: 100%;
   border-collapse: collapse;

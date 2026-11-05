@@ -347,7 +347,9 @@ export function IssueDetail({ id }: { id: string }) {
                       {t("similarity", { percent: Math.round(similarity * 100) })}
                     </Badge>
                   </div>
-                  <p className="my-3 text-sm leading-relaxed">{submission.description}</p>
+                  <p className="my-3 max-w-[90ch] break-words text-sm leading-relaxed">
+                    {submission.description}
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"

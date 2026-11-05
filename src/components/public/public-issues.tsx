@@ -116,7 +116,7 @@ export function PublicIssues() {
     setStatus("");
   }
   return (
-    <div className="mx-auto max-w-[1200px] px-5 py-11 sm:px-8 sm:py-16 lg:px-10">
+    <div className="public-container py-11 sm:py-16">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <div className="mb-6 flex flex-wrap items-center gap-3">
