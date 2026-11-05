@@ -1,6 +1,6 @@
-# UniVoice
+# UniVoice AI
 
-UniVoice is a Russian/Kazakh anonymous feedback and issue-resolution platform for universities. Each deployment has its own institution identity and Supabase database. The application starts with no reports, issues or fabricated statistics. There is no demo login or synthetic AI fallback.
+UniVoice AI is a Russian/Kazakh anonymous feedback and issue-resolution platform for universities. Each deployment has its own institution identity and Supabase database. The application starts with no reports, issues or fabricated statistics. There is no demo login or synthetic AI fallback.
 
 ## Run locally
 
@@ -27,6 +27,7 @@ Open **http://localhost:3000**. In development, `localhost`, `127.0.0.1` and `[:
 - Supabase Auth with verified server-side roles, session refresh, PostgreSQL RLS, audit history, atomic mutations and pgvector similarity.
 - Zod validation, honeypot, body limits, durable rate limits, same-origin checks, hashed 192-bit tracking tokens and server-only secrets.
 - Separate optional AI consent, Groq/Cloudflare classification, local redaction, output validation and administrator retry. OpenAI with embeddings remains an explicit optional choice. An explicitly configured Cloudflare reserve handles Groq quota errors. Provider failures retain the report without inventing analysis.
+- Optional Russian/Kazakh draft assistant in the feedback form: previews a clearer draft, suggests a category and asks fixed clarification questions. Applying text/category is explicit, and replacing the draft can be undone. Its separate consent does not enable post-submission AI analysis.
 - Russian/Kazakh cookie settings, necessary-only or optional error diagnostics, 180-day preference, cross-tab updates and consent withdrawal without changing login or language cookies.
 - Sentry browser, React and server/API error reporting with request-specific consent and a strict payload allowlist. Session replay, behavior analytics, tracing, logs and metrics are disabled.
 
@@ -45,11 +46,13 @@ ORGANIZATION_INITIALS=EU
 
 The active language selects its matching name, falling back to `ORGANIZATION_NAME`, then the neutral “Университетское сообщество” / “Университет қауымдастығы”. Restart the server after changing environment settings.
 
-This MVP supports **one university per deployment and database**. Use separate Supabase projects for separate institutions. Shared-database tenant isolation and institution switching are not implemented. The existing GitHub repository URL is retained; the product and package name are UniVoice.
+This MVP supports **one university per deployment and database**. Use separate Supabase projects for separate institutions. Shared-database tenant isolation and institution switching are not implemented. The existing GitHub repository URL is retained; the product name is UniVoice AI and the package identifier remains `univoice`.
 
 Design references and decisions: [docs/univoice-design.md](docs/univoice-design.md). Connected design tools and the next focused pass: [docs/design-tools.md](docs/design-tools.md).
 
 ## AI analysis
+
+The draft assistant uses the configured provider below through the server-only `POST /api/feedback/assist` route. It saves no draft or submission, sends only locally redacted text, and validates generated output. Durable abuse counters allow 5 requests per client per hour and 100 provider attempts per installation per 24-hour window; a reserve attempt counts separately. Errors leave manual submission available. A university knowledge chatbot is a planned next stage, not part of this feature.
 
 Select one provider in `.env.local` or the hosting environment. Keys stay on the server:
 
@@ -60,7 +63,7 @@ Select one provider in `.env.local` or the hosting environment. Keys stay on the
 | OpenAI (optional paid API) | `AI_PROVIDER=openai`, `OPENAI_API_KEY` | `gpt-4.1-mini` |
 | Disabled | `AI_PROVIDER=disabled` | No external requests |
 
-Create a [Groq key](https://console.groq.com/keys) on its Free plan, or use the [Workers AI free allocation](https://developers.cloudflare.com/workers-ai/platform/pricing/). Free quotas are limited and may change; a paid provider account can incur charges under its own plan. UniVoice does not upgrade plans. Set `AI_FALLBACK_PROVIDER=cloudflare` with both Cloudflare credentials to allow one reserve attempt after Groq HTTP 429. Privacy, authentication, network and malformed-response failures never switch providers. Leave the variable empty to disable the reserve. After changing configuration, restart the server or redeploy.
+Create a [Groq key](https://console.groq.com/keys) on its Free plan, or use the [Workers AI free allocation](https://developers.cloudflare.com/workers-ai/platform/pricing/). Free quotas are limited and may change; a paid provider account can incur charges under its own plan. UniVoice AI does not upgrade plans. Set `AI_FALLBACK_PROVIDER=cloudflare` with both Cloudflare credentials to allow one reserve attempt after Groq HTTP 429. Privacy, authentication, network and malformed-response failures never switch providers. Leave the variable empty to disable the reserve. After changing configuration, restart the server or redeploy.
 
 With separate report consent, AI suggests a category, a summary and keywords in the report's language (Russian or Kazakh), urgency, and a confidence estimate. An administrator reviews every suggestion. Missing credentials, exhausted quotas, unsafe text or invalid responses leave the report available for manual review and retry. Groq/Cloudflare do not request embeddings; semantic similarity for newly analyzed reports requires explicitly selecting the existing OpenAI integration. Details: [provider setup and privacy](docs/backend.md#ai-providers).
 
@@ -95,7 +98,7 @@ The production build uses the supported Webpack compiler because some desktop sa
 
 ## Deployment
 
-Public URL: **https://khalel-insight-ai.vercel.app/**. The existing Vercel project is `kai-6ade/khalel-insight-ai`, connected to the `main` branch of `thzsqeze/khalel-insight-ai`. The repository and hosting identifiers retain their original names; the product is UniVoice.
+Public URL: **https://khalel-insight-ai.vercel.app/**. The existing Vercel project is `kai-6ade/khalel-insight-ai`, connected to the `main` branch of `thzsqeze/khalel-insight-ai`. The repository and hosting identifiers retain their original names; the product is UniVoice AI.
 
 Set the variables from `.env.example` in your hosting environment. Use the exact HTTPS `APP_ORIGIN`, keep `SUPABASE_SECRET_KEY` server-only and configure `TRUSTED_IP_HEADER` only when your ingress overwrites it. Legacy Supabase anon/service-role keys remain supported. AI is optional; set the selected provider's server variables separately on the host. Deploy on the Node runtime (Node 24 recommended) with `pnpm build`.
 

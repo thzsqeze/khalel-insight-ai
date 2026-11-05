@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { categories, type Category, type Locale, type Submission } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { DraftAssistant } from "./draft-assistant";
 import {
   postPublic,
   PublicError,
@@ -62,8 +63,8 @@ function SubmissionReceipt({ receipt }: { receipt: Receipt }) {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
-    <div className="mx-auto max-w-[760px] px-5 py-14 sm:px-8 sm:py-20">
-      <div className="text-center">
+    <div className="public-container grid items-start gap-x-12 py-14 sm:py-20 lg:grid-cols-[0.85fr_1.15fr]">
+      <div className="lg:row-span-3">
         <span className="mb-6 inline-grid size-16 place-items-center rounded-xl border border-[#d1d8c9] bg-[#eaf0e3] text-primary">
           <CheckCircle2 className="size-8" strokeWidth={1.5} />
         </span>
@@ -71,11 +72,11 @@ function SubmissionReceipt({ receipt }: { receipt: Receipt }) {
         <h1 className="mt-4 text-3xl font-medium tracking-[-1px] text-foreground sm:text-4xl">
           {t("successTitle")}
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">
+        <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground">
           {t("successDescription", { reference: receipt.reference })}
         </p>
       </div>
-      <div className="mt-9 rounded-xl border border-[#c3cbb9] bg-[#fffefa] p-6 sm:p-8">
+      <div className="mt-9 min-w-0 rounded-xl border border-[#c3cbb9] bg-[#fffefa] p-6 sm:p-8 lg:mt-0">
         <label htmlFor="receipt-code" className="mb-3 block text-sm font-semibold text-foreground">
           {t("codeLabel")}
         </label>
@@ -162,6 +163,7 @@ export function SubmissionForm({ initialCategory }: { initialCategory?: Category
     handleSubmit,
     trigger,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -178,6 +180,7 @@ export function SubmissionForm({ initialCategory }: { initialCategory?: Category
   const role = useWatch({ control, name: "role" });
   const description = useWatch({ control, name: "description" });
   const selectedCategory = useWatch({ control, name: "category" });
+  const website = useWatch({ control, name: "website" });
   useEffect(() => {
     if (step > 0) headingRef.current?.focus({ preventScroll: true });
   }, [step]);
@@ -201,7 +204,7 @@ export function SubmissionForm({ initialCategory }: { initialCategory?: Category
   }
   if (receipt) return <SubmissionReceipt receipt={receipt} />;
   return (
-    <div className="mx-auto max-w-[1120px] px-5 py-10 sm:px-8 sm:py-14 lg:py-16">
+    <div className="public-container py-10 sm:py-14 lg:py-16">
       <div className="mb-8 flex flex-wrap items-center gap-3">
         <p className="text-xs font-semibold tracking-[1.7px] text-primary">{t("eyebrow")}</p>
       </div>
@@ -214,7 +217,7 @@ export function SubmissionForm({ initialCategory }: { initialCategory?: Category
           {t("selectedTopic", { category: c(`categories.${selectedCategory}`) })}
         </p>
       )}
-      <div className="mt-9 grid items-start gap-7 lg:grid-cols-[1fr_280px]">
+      <div className="mt-9 grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.38fr)] xl:gap-10">
         <div className="overflow-hidden rounded-2xl border border-border bg-[#fffefa]">
           <ol
             className="flex border-b border-border bg-[#f0f0e9]/60 px-5 py-5 sm:px-8"
@@ -435,12 +438,27 @@ export function SubmissionForm({ initialCategory }: { initialCategory?: Category
                       {t("characters", { count: description.length })}
                     </span>
                   </div>
-                  {errors.description && (
-                    <p id="description-error" role="alert" className="mt-2 text-xs text-red-700">
-                      {errors.description.message}
-                    </p>
-                  )}
+                  <div className="min-h-6 pt-1">
+                    {errors.description && (
+                      <p id="description-error" role="alert" className="text-xs text-red-700">
+                        {errors.description.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
+                <DraftAssistant
+                  description={description}
+                  category={selectedCategory}
+                  locale={locale}
+                  startedAt={startedAt}
+                  website={website}
+                  onApplyDraft={(draft) =>
+                    setValue("description", draft, { shouldDirty: true, shouldValidate: true })
+                  }
+                  onApplyCategory={(category) =>
+                    setValue("category", category, { shouldDirty: true, shouldValidate: true })
+                  }
+                />
               </div>
             )}
             {step === 2 && (

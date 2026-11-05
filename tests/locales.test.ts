@@ -1,5 +1,7 @@
 import analyticsRu from "@/messages/analytics-ru.json";
 import analyticsKk from "@/messages/analytics-kk.json";
+import assistantRu from "@/messages/assistant-ru.json";
+import assistantKk from "@/messages/assistant-kk.json";
 import teamRu from "@/messages/team-ru.json";
 import teamKk from "@/messages/team-kk.json";
 import ticketsRu from "@/messages/tickets-ru.json";
@@ -25,6 +27,7 @@ describe("complete Russian and Kazakh catalogs", () => {
     ["analytics", analyticsRu, analyticsKk],
     ["team", teamRu, teamKk],
     ["tickets", ticketsRu, ticketsKk],
+    ["assistant", assistantRu, assistantKk],
   ] as const) {
     it(`${scope} provides all translated keys and preserves interpolation parameters`, () => {
       const russian = flatten(ru),
