@@ -1,6 +1,7 @@
 import { expect, test as base, type Page, type Route } from "@playwright/test";
 import ru from "../src/messages/public-ru.json";
 import kk from "../src/messages/public-kk.json";
+import assistantRu from "../src/messages/assistant-ru.json";
 
 const original = "В учебных аудиториях не хватает розеток для ноутбуков.";
 const draft = "Прошу добавить розетки для ноутбуков в учебных аудиториях.";
@@ -188,7 +189,10 @@ test("provider failure preserves the manual draft and allows continuing without 
   );
   await openDetails(page);
   await requestSuggestion(page);
-  await expect(page.getByRole("alert")).toBeVisible();
+  // Scoped to the message: Next.js renders its route announcer with role=alert too.
+  await expect(
+    page.getByRole("alert").filter({ hasText: assistantRu.draftAssistant.errors.unknown }),
+  ).toBeVisible();
   await expect(page.locator("#draft-assistant-result")).toHaveCount(0);
   await expect(page.locator("#description")).toHaveValue(original);
   await page.getByRole("button", { name: ru.commonPublic.next, exact: true }).click();
