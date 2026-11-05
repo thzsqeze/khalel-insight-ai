@@ -85,21 +85,19 @@ export class ProductionRepository implements Repository {
       trackingCode = createTrackingCode(),
       reference = `UV-${randomBytes(5).toString("hex").toUpperCase()}`,
       analysisStatus = input.aiConsent ? "pending" : "skipped";
-    const { error } = await this.client
-      .from("submissions")
-      .insert({
-        id,
-        reference,
-        tracking_hash: hashTrackingCode(trackingCode),
-        role: input.role,
-        category: input.category,
-        description: input.description,
-        faculty: input.faculty || null,
-        locale: input.locale,
-        consent: true,
-        ai_consent: input.aiConsent,
-        analysis_status: analysisStatus,
-      });
+    const { error } = await this.client.from("submissions").insert({
+      id,
+      reference,
+      tracking_hash: hashTrackingCode(trackingCode),
+      role: input.role,
+      category: input.category,
+      description: input.description,
+      faculty: input.faculty || null,
+      locale: input.locale,
+      consent: true,
+      ai_consent: input.aiConsent,
+      analysis_status: analysisStatus,
+    });
     check(error);
     return { id, trackingCode, reference, analysisStatus };
   }
