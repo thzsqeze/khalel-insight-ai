@@ -12,16 +12,7 @@ concurrency:
 permissions:
   contents: read
 
-# Placeholder configuration only. CI must never reach a real database or AI
-# provider: the Supabase values are unroutable and analysis is disabled, so
-# private routes answer 401 instead of failing on missing configuration.
 env:
-  APP_ORIGIN: http://127.0.0.1:3100
-  UNIVOICE_SUPABASE_URL: https://ci.invalid
-  UNIVOICE_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
-  UNIVOICE_SUPABASE_SECRET_KEY: ci-placeholder-secret-key
-  RATE_LIMIT_SALT: ci-placeholder-rate-limit-salt
-  AI_PROVIDER: disabled
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
@@ -44,6 +35,17 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    # Placeholder configuration only: the build needs a configuration and must
+    # never reach a real database or AI provider. The unit tests in `checks`
+    # deliberately run without these values — they stub their own environment,
+    # and a placeholder here would override what they assert.
+    env:
+      APP_ORIGIN: http://127.0.0.1:3100
+      UNIVOICE_SUPABASE_URL: https://ci.invalid
+      UNIVOICE_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      UNIVOICE_SUPABASE_SECRET_KEY: ci-placeholder-secret-key
+      RATE_LIMIT_SALT: ci-placeholder-rate-limit-salt
+      AI_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -56,6 +58,16 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    # Same placeholders as the build: an unroutable database host and disabled
+    # analysis, so private routes answer 401 instead of failing on missing
+    # configuration, which is what the browser tests assert.
+    env:
+      APP_ORIGIN: http://127.0.0.1:3100
+      UNIVOICE_SUPABASE_URL: https://ci.invalid
+      UNIVOICE_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      UNIVOICE_SUPABASE_SECRET_KEY: ci-placeholder-secret-key
+      RATE_LIMIT_SALT: ci-placeholder-rate-limit-salt
+      AI_PROVIDER: disabled
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
