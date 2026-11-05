@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Placeholder configuration only. CI must never reach a real database or AI
+# provider: the Supabase values are unroutable and analysis is disabled, so
+# private routes answer 401 instead of failing on missing configuration.
+env:
+  APP_ORIGIN: http://127.0.0.1:3100
+  UNIVOICE_SUPABASE_URL: https://ci.invalid
+  UNIVOICE_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+  UNIVOICE_SUPABASE_SECRET_KEY: ci-placeholder-secret-key
+  RATE_LIMIT_SALT: ci-placeholder-rate-limit-salt
+  AI_PROVIDER: disabled
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Generates .next/types, which next-env.d.ts references. Without it tsc
+      # fails on a clean checkout before reaching any real type error.
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      # Specs needing real Supabase credentials or a Sentry DSN skip themselves.
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
