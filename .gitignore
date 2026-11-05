@@ -3,6 +3,7 @@ node_modules/
 .next/
 .vercel/
 out/
+output/
 .env*
 !.env.example
 .data/
